@@ -1,5 +1,6 @@
 package com.megasupload.megasuploadandroidapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
 import android.graphics.Color;
@@ -38,6 +39,8 @@ public class MainActivity extends Activity  {
                         ed2.getText().toString().equals("admin")) {
                     Toast.makeText(getApplicationContext(),
                             "Redirecting...",Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this, HomePage.class);
+                    startActivity(intent);
                 }else{
                     Toast.makeText(getApplicationContext(), "Wrong Credentials",Toast.LENGTH_SHORT).show();
 
