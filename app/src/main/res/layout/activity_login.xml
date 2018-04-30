@@ -4,9 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".MainActivity">
+    tools:context=".LoginActivity">
 
-    <TextView android:text = "Login" android:layout_width="wrap_content"
+    <TextView android:text = "Login"
+        android:layout_width="wrap_content"
         android:layout_height = "wrap_content"
         android:id = "@+id/textview"
         android:textSize = "35dp"
@@ -26,7 +27,7 @@
     <EditText
         android:layout_width = "wrap_content"
         android:layout_height = "wrap_content"
-        android:id = "@+id/editText"
+        android:id = "@+id/loginEditText"
         android:hint = "Enter Name"
         android:focusable = "true"
         android:textColorHighlight = "#ff7eff15"
@@ -38,8 +39,10 @@
         android:layout_alignParentEnd = "true" />
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="27dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitEnd"
+        android:src="@drawable/logo_megasupload"
         android:text="Hello World!"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -51,12 +54,12 @@
         android:layout_height="wrap_content"
         android:inputType="textPassword"
         android:ems="10"
-        android:id="@+id/editText2"
-        android:layout_below="@+id/editText"
+        android:id="@+id/passwordEditText"
+        android:layout_below="@+id/loginEditText"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/editText"
-        android:layout_alignEnd="@+id/editText"
+        android:layout_alignRight="@+id/loginEditText"
+        android:layout_alignEnd="@+id/loginEditText"
         android:textColorHint="#ffff299f"
         android:hint="Password" />
 
@@ -65,7 +68,7 @@
         android:layout_height="wrap_content"
         android:text="Attempts Left:"
         android:id="@+id/textView2"
-        android:layout_below="@+id/editText2"
+        android:layout_below="@+id/passwordEditText"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:textSize="25dp" />
@@ -84,13 +87,13 @@
         android:layout_toRightOf="@+id/textview" />
 
     <Button
+        android:id="@+id/loginButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="login"
-        android:id="@+id/button"
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/textview"
-        android:layout_toStartOf="@+id/textview" />
+        android:layout_toStartOf="@+id/textview"
+        android:text="login" />
 
     <Button
         android:layout_width="wrap_content"
