@@ -42,6 +42,7 @@ public class HomePage extends Activity {
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String name = sharedPreferences.getString(KEY_NAME, null);
         welcomeTextView.setText("Hello welcome " + name);
+
         logoutButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -49,6 +50,8 @@ public class HomePage extends Activity {
                 session.logoutUser();
             }
         });
+
+
 
     }
 }

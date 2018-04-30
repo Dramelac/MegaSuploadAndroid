@@ -15,6 +15,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -34,6 +39,9 @@ public class LoginActivity extends Activity {
 
     @BindView(R.id.loginButton)
     Button loginButton;
+
+    @BindView(R.id.cancel)
+    Button cancel;
 
     int counter = 3;
 
@@ -63,6 +71,7 @@ public class LoginActivity extends Activity {
         }
 
         sharedPreferences = this.getSharedPreferences(PREFER_NAME, Context.MODE_PRIVATE);
+
         loginButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -70,6 +79,16 @@ public class LoginActivity extends Activity {
                 login(intent);
             }
         });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                AsyncT asyncT = new AsyncT();
+                asyncT.execute();
+            }
+        });
+
 
 
         }
