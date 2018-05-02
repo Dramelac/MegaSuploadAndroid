@@ -41,8 +41,8 @@ public class LoginActivity extends Activity implements AsyncResponse {
     @BindView(R.id.loginButton)
     Button loginButton;
 
-    @BindView(R.id.cancel)
-    Button cancel;
+    @BindView(R.id.register)
+    Button registerButton;
 
     int counter = 3;
 
@@ -163,6 +163,7 @@ public class LoginActivity extends Activity implements AsyncResponse {
         boolean valid = true;
 
         String userName = loginEditText.getText().toString();
+        String password = passwordEditText.getText().toString();
 
         if (userName.isEmpty()) {
             loginEditText.setError("enter an UserName");
@@ -170,13 +171,19 @@ public class LoginActivity extends Activity implements AsyncResponse {
         } else {
             loginEditText.setError(null);
         }
+        if (password.isEmpty()) {
+            passwordEditText.setError("enter an Password");
+            valid = false;
+        } else {
+            passwordEditText.setError(null);
+        }
 
         return valid;
     }
 
     @Override
     public void processFinish( Map<String, Object> output){
-        String test1 = output.get("message").toString();
+        String message = output.get("message").toString();
         session.createUserLoginSession(loginEditText.getText().toString());
 
     }
