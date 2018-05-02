@@ -112,7 +112,7 @@ public class LoginActivity extends Activity implements AsyncResponse {
         //Initialisation des paramètres nécéssaires pour la requete à l'API
         Params params = new Params();
         params.setUrl("https://megasupload.lsd-music.fr/api/auth/login");
-        params.setMethod("POST");
+        params.setMethod("POST"); 
         params.setJsonObject(jsonObject);
 
         HttpAsyncTask loginTask = new  HttpAsyncTask();
