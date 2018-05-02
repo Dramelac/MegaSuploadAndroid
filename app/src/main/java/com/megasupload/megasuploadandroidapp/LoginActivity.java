@@ -6,25 +6,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.megasupload.megasuploadandroidapp.API.AsyncResponse;
+import com.megasupload.megasuploadandroidapp.API.HttpAsyncTask;
+import com.megasupload.megasuploadandroidapp.API.Params;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
+import java.util.Map;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends Activity implements AsyncResponse {
 
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
     private static final String PREFER_NAME = "Reg";
-
-
 
     @BindView(R.id.loginEditText)
     EditText loginEditText;
@@ -34,6 +40,9 @@ public class LoginActivity extends Activity {
 
     @BindView(R.id.loginButton)
     Button loginButton;
+
+    @BindView(R.id.cancel)
+    Button cancel;
 
     int counter = 3;
 
@@ -63,6 +72,7 @@ public class LoginActivity extends Activity {
         }
 
         sharedPreferences = this.getSharedPreferences(PREFER_NAME, Context.MODE_PRIVATE);
+
         loginButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -71,8 +81,8 @@ public class LoginActivity extends Activity {
             }
         });
 
-
         }
+
     public void login (final Intent intent) {
         Log.d(TAG, "Login");
         if (!validate()) {
@@ -89,8 +99,25 @@ public class LoginActivity extends Activity {
         progressDialog.show();
 
         final String userName = loginEditText.getText().toString();
-        session.createUserLoginSession(userName);
-        // TODO: Implement your own authentication logic here.
+
+        //Creation de l'objet en fonction des parametres qu'a besoin le requete à l'API
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.accumulate("username", loginEditText.getText().toString());
+            jsonObject.accumulate("password", passwordEditText.getText().toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //Initialisation des paramètres nécéssaires pour la requete à l'API
+        Params params = new Params();
+        params.setUrl("https://megasupload.lsd-music.fr/api/auth/login");
+        params.setMethod("POST");
+        params.setJsonObject(jsonObject);
+
+        HttpAsyncTask loginTask = new  HttpAsyncTask();
+        loginTask.delegate = this;
+        loginTask.execute(params);
 
         new android.os.Handler().postDelayed(
                 new Runnable() {
@@ -101,6 +128,7 @@ public class LoginActivity extends Activity {
                     }
                 }, 3000);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_SIGNUP) {
@@ -145,5 +173,14 @@ public class LoginActivity extends Activity {
 
         return valid;
     }
+
+    @Override
+    public void processFinish( Map<String, Object> output){
+        String test1 = output.get("message").toString();
+        session.createUserLoginSession(loginEditText.getText().toString());
+
+    }
+
+
 }
 
