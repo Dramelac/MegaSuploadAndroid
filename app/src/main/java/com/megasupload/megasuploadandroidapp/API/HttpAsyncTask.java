@@ -1,10 +1,7 @@
-package com.megasupload.megasuploadandroidapp;
+package com.megasupload.megasuploadandroidapp.API;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.megasupload.megasuploadandroidapp.Params;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -17,23 +14,45 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class HttpAsyncTask extends AsyncTask<Params, Void, String> {
+public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >{
+    public AsyncResponse delegate = null;
     @Override
-    protected String doInBackground(Params... params) {
+    protected Map<String, Object>  doInBackground(Params... params) {
+        Map<String, Object>  result = new HashMap<String, Object>();
 
-        return POST(params[0].getUrl(),params[0].getJsonObject());
+        if(params[0].getMethod().equals("POST")){
+            result = POST(params[0].getUrl(),params[0].getJsonObject());
+            return result;
+        }
+        else if (params[0].getMethod().equals("GET")){
+
+            return POST(params[0].getUrl(),params[0].getJsonObject());
+        }
+        else {
+            result.put("message","Error");
+            return result;
+        }
+
     }
     // onPostExecute displays the results of the AsyncTask.
     @Override
-    protected void onPostExecute(String result) {
-
+    protected void onPostExecute(Map<String, Object> result) {
+        delegate.processFinish(result);
     }
 
-    public static String POST(String url, JSONObject jsonObject){
+
+    public static Map<String, Object>  POST(String url, JSONObject jsonObject){
         InputStream inputStream = null;
-        String result = "";
+        Map<String, Object>  result = new HashMap<String, Object>();
         try {
 
             // 1. create HttpClient
@@ -73,8 +92,9 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, String> {
             // 10. convert inputstream to string
             if(inputStream != null)
                 result = convertInputStreamToString(inputStream);
+
             else
-                result = "Did not work!";
+                result.put("message","Error");
 
         } catch (Exception e) {
             Log.d("InputStream", e.getLocalizedMessage());
@@ -83,12 +103,15 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, String> {
         // 11. return result
         return result;
     }
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+
+    private static Map<String, Object>  convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
         String line = "";
-        String result = "";
-        while((line = bufferedReader.readLine()) != null)
-            result += line;
+        Map<String, Object> result = new HashMap<String, Object>();
+
+        while((line = bufferedReader.readLine()) != null){
+            result = new ObjectMapper().readValue(line, HashMap.class);
+        }
 
         inputStream.close();
         return result;

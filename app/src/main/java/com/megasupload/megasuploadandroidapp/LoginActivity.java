@@ -5,44 +5,32 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.megasupload.megasuploadandroidapp.API.AsyncResponse;
+import com.megasupload.megasuploadandroidapp.API.HttpAsyncTask;
+import com.megasupload.megasuploadandroidapp.API.Params;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.Policy;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class LoginActivity extends Activity {
+public class LoginActivity extends Activity implements AsyncResponse {
 
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
     private static final String PREFER_NAME = "Reg";
-
-
 
     @BindView(R.id.loginEditText)
     EditText loginEditText;
@@ -128,9 +116,8 @@ public class LoginActivity extends Activity {
         params.setJsonObject(jsonObject);
 
         HttpAsyncTask loginTask = new  HttpAsyncTask();
+        loginTask.delegate = this;
         loginTask.execute(params);
-
-        session.createUserLoginSession(userName);
 
         new android.os.Handler().postDelayed(
                 new Runnable() {
@@ -185,6 +172,13 @@ public class LoginActivity extends Activity {
         }
 
         return valid;
+    }
+
+    @Override
+    public void processFinish( Map<String, Object> output){
+        String test1 = output.get("message").toString();
+        session.createUserLoginSession(loginEditText.getText().toString());
+
     }
 
 

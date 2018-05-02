@@ -1,4 +1,4 @@
-package com.megasupload.megasuploadandroidapp;
+package com.megasupload.megasuploadandroidapp.API;
 
 import org.json.JSONObject;
 
