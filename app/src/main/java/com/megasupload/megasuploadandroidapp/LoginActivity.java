@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -30,6 +31,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.Policy;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -91,18 +93,8 @@ public class LoginActivity extends Activity {
             }
         });
 
-        cancel.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                new HttpAsyncTask().execute("https://megasupload.lsd-music.fr/api/auth/login");
-
-            }
-        });
-
-
-
         }
+
     public void login (final Intent intent) {
         Log.d(TAG, "Login");
         if (!validate()) {
@@ -119,8 +111,26 @@ public class LoginActivity extends Activity {
         progressDialog.show();
 
         final String userName = loginEditText.getText().toString();
+
+        //Creation de l'objet en fonction des parametres qu'a besoin le requete à l'API
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.accumulate("username", loginEditText.getText().toString());
+            jsonObject.accumulate("password", passwordEditText.getText().toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        //Initialisation des paramètres nécéssaires pour la requete à l'API
+        Params params = new Params();
+        params.setUrl("https://megasupload.lsd-music.fr/api/auth/login");
+        params.setMethod("POST");
+        params.setJsonObject(jsonObject);
+
+        HttpAsyncTask loginTask = new  HttpAsyncTask();
+        loginTask.execute(params);
+
         session.createUserLoginSession(userName);
-        // TODO: Implement your own authentication logic here.
 
         new android.os.Handler().postDelayed(
                 new Runnable() {
@@ -131,6 +141,7 @@ public class LoginActivity extends Activity {
                     }
                 }, 3000);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_SIGNUP) {
@@ -175,91 +186,7 @@ public class LoginActivity extends Activity {
 
         return valid;
     }
-    public static String POST(String url, User user){
-        InputStream inputStream = null;
-        String result = "";
-        try {
-
-            // 1. create HttpClient
-            HttpClient httpclient = new DefaultHttpClient();
-
-            // 2. make POST request to the given URL
-            HttpPost httpPost = new HttpPost(url);
-
-            String json = "";
-
-            // 3. build jsonObject
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.accumulate("login", user.getLogin());
-            jsonObject.accumulate("password", user.getPassword());
 
 
-            // 4. convert JSONObject to JSON to String
-            json = jsonObject.toString();
-
-            // ** Alternative way to convert Person object to JSON string usin Jackson Lib
-            // ObjectMapper mapper = new ObjectMapper();
-            // json = mapper.writeValueAsString(person);
-
-            // 5. set json to StringEntity
-            StringEntity se = new StringEntity(json);
-
-            // 6. set httpPost Entity
-            httpPost.setEntity(se);
-
-            // 7. Set some headers to inform server about the type of the content
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json");
-            httpPost.setHeader("X-CSRFToken","G2IMbiAntBExBAzMHhXdhU4EAEK9rEmizhOQWeTv8j7lAYaGuVdp3tkztHKzEJjb");
-            httpPost.setHeader("cookie","csrftoken=G2IMbiAntBExBAzMHhXdhU4EAEK9rEmizhOQWeTv8j7lAYaGuVdp3tkztHKzEJjb");
-
-            // 8. Execute POST request to the given URL
-            HttpResponse httpResponse = httpclient.execute(httpPost);
-
-            // 9. receive response as inputStream
-            inputStream = httpResponse.getEntity().getContent();
-
-            // 10. convert inputstream to string
-            if(inputStream != null)
-                result = convertInputStreamToString(inputStream);
-            else
-                result = "Did not work!";
-
-        } catch (Exception e) {
-            Log.d("InputStream", e.getLocalizedMessage());
-        }
-
-        // 11. return result
-        return result;
-    }
-
-    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... urls) {
-
-            User user = new User();
-            user.setLogin("dorian");
-            user.setPassword("SupinfO!");
-
-
-            return POST(urls[0],user);
-        }
-        // onPostExecute displays the results of the AsyncTask.
-        @Override
-        protected void onPostExecute(String result) {
-            Toast.makeText(getBaseContext(), "Data Sent!", Toast.LENGTH_LONG).show();
-        }
-    }
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException{
-        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-        String line = "";
-        String result = "";
-        while((line = bufferedReader.readLine()) != null)
-            result += line;
-
-        inputStream.close();
-        return result;
-
-    }
 }
 
