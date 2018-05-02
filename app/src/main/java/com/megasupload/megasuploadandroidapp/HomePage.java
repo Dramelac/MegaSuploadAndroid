@@ -17,6 +17,7 @@ import butterknife.ButterKnife;
 
 import static com.megasupload.megasuploadandroidapp.UserSession.KEY_NAME;
 import static com.megasupload.megasuploadandroidapp.UserSession.PREFER_NAME;
+import static com.megasupload.megasuploadandroidapp.UserSession.PUB_KEY;
 
 public class HomePage extends Activity {
 
@@ -41,7 +42,8 @@ public class HomePage extends Activity {
 
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String name = sharedPreferences.getString(KEY_NAME, null);
-        welcomeTextView.setText("Hello welcome " + name);
+
+        welcomeTextView.setText("Hello welcome " + name );
 
         logoutButton.setOnClickListener(new View.OnClickListener() {
 

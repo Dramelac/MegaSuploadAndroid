@@ -167,8 +167,10 @@ public class LoginActivity extends Activity implements AsyncResponse {
 
     @Override
     public void processFinish( Map<String, Object> output){
+
         try {
             String message = output.get("message").toString();
+
             final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this, R.style.Theme_AppCompat_DayNight_Dialog);
             progressDialog.setIndeterminate(true);
             progressDialog.setMessage("Authenticating...");
@@ -177,7 +179,7 @@ public class LoginActivity extends Activity implements AsyncResponse {
             if (message.equals("Login successful.")){
                 String priv_key = output.get("priv_key").toString();
                 String pub_key = output.get("pub_key").toString();
-                session.createUserLoginSession(loginEditText.getText().toString());
+                session.createUserLoginSession(loginEditText.getText().toString(),priv_key,pub_key);
                 final Intent intent = new Intent(this, HomePage.class);
 
                 new android.os.Handler().postDelayed(
