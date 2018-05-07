@@ -5,6 +5,7 @@ import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -35,7 +36,7 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
         }
         else if (params[0].getMethod().equals("GET")){
 
-            return POST(params[0].getUrl(),params[0].getJsonObject());
+            return GET(params[0].getUrl());
         }
         else {
             result.put("message","Error");
@@ -104,6 +105,45 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
         return result;
     }
 
+    public static Map<String, Object>  GET(String url){
+        InputStream inputStream = null;
+        Map<String, Object>  result = new HashMap<String, Object>();
+        try {
+
+            // 1. create HttpClient
+            HttpClient httpclient = new DefaultHttpClient();
+
+            // 2. make POST request to the given URL
+            HttpGet httpGet = new HttpGet(url);
+
+
+            // 7. Set some headers to inform server about the type of the content
+            httpGet.setHeader("Accept", "application/json");
+            httpGet.setHeader("Content-type", "application/json");
+            httpGet.setHeader("X-CSRFToken","076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl");
+            httpGet.setHeader("cookie","csrftoken=076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl");
+
+            // 8. Execute POST request to the given URL
+            HttpResponse httpResponse = httpclient.execute(httpGet);
+
+            // 9. receive response as inputStream
+            inputStream = httpResponse.getEntity().getContent();
+
+            // 10. convert inputstream to string
+            if(inputStream != null)
+                result = convertInputStreamToString(inputStream);
+
+            else
+                result.put("message","Error");
+
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+
+        // 11. return result
+        return result;
+    }
+
     private static Map<String, Object>  convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
         String line = "";
@@ -111,6 +151,9 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
 
         while((line = bufferedReader.readLine()) != null){
             result = new ObjectMapper().readValue(line, HashMap.class);
+        }
+        if (result.size()==0){
+            result.put("message","No data");
         }
 
         inputStream.close();

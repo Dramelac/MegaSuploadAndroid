@@ -3,8 +3,15 @@ package com.megasupload.megasuploadandroidapp;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.widget.Toast;
 
-public class UserSession {
+import com.megasupload.megasuploadandroidapp.API.AsyncResponse;
+import com.megasupload.megasuploadandroidapp.API.HttpAsyncTask;
+import com.megasupload.megasuploadandroidapp.API.Params;
+
+import java.util.Map;
+
+public class UserSession implements AsyncResponse {
     public static final String PREFER_NAME = "Reg";
     public static final String IS_USER_LOGIN = "IsLoggedIn";
     public static final String KEY_NAME = "Name";
@@ -32,6 +39,15 @@ public class UserSession {
     public void logoutUser(){
         editor.clear();
         editor.commit();
+        //Initialisation des paramètres nécéssaires pour la requete à l'API
+        Params params = new Params();
+        params.setUrl("https://megasupload.lsd-music.fr/api/auth/logout");
+        params.setMethod("GET");
+
+        HttpAsyncTask loginTask = new  HttpAsyncTask();
+        loginTask.delegate = this;
+        loginTask.execute(params);
+
         Intent intent = new Intent(context, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -41,5 +57,15 @@ public class UserSession {
 
     public boolean isLoggedIn(){
         return preferences.getBoolean(IS_USER_LOGIN, false);
+    }
+    @Override
+    public void processFinish( Map<String, Object> output){
+        try {
+            String message = output.get("message").toString();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 }

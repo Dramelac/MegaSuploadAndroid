@@ -12,6 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.megasupload.megasuploadandroidapp.API.AsyncResponse;
+
+import java.util.Map;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -19,7 +23,7 @@ import static com.megasupload.megasuploadandroidapp.UserSession.KEY_NAME;
 import static com.megasupload.megasuploadandroidapp.UserSession.PREFER_NAME;
 import static com.megasupload.megasuploadandroidapp.UserSession.PUB_KEY;
 
-public class HomePage extends Activity {
+public class HomePage extends Activity implements AsyncResponse{
 
 
     @BindView(R.id.welcomeTextView)
@@ -53,8 +57,11 @@ public class HomePage extends Activity {
             }
         });
 
-
+    }
+    @Override
+    public void processFinish( Map<String, Object> output){
 
     }
+
 }
 
