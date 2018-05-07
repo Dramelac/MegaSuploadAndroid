@@ -17,6 +17,7 @@ public class UserSession implements AsyncResponse {
     public static final String KEY_NAME = "Name";
     public static final String PRIV_KEY = "priv_key";
     public static final String PUB_KEY = "pub_key";
+    public static final String SESSION_COOKIE = "sessionCookie";
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private Context context;
@@ -28,11 +29,12 @@ public class UserSession implements AsyncResponse {
         editor = preferences.edit();
     }
 
-    public void createUserLoginSession(final String name,final String priv_key,final String pub_key){
+    public void createUserLoginSession(final String name,final String priv_key,final String pub_key,final String sessionCookie){
         editor.putBoolean(IS_USER_LOGIN,true);
         editor.putString(KEY_NAME, name);
         editor.putString(PRIV_KEY, priv_key);
         editor.putString(PUB_KEY, pub_key);
+        editor.putString(SESSION_COOKIE, sessionCookie);
         editor.commit();
     }
 
