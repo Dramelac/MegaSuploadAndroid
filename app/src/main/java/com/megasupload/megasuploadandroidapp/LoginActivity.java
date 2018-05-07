@@ -62,6 +62,7 @@ public class LoginActivity extends Activity implements AsyncResponse {
 
 
         final Intent intent = new Intent(this, HomePage.class);
+        final Intent intent_register = new Intent(this, RegisterActivity.class);
         session = new UserSession(getApplicationContext());
         Toast.makeText(getApplicationContext(), "User Login Status: " + session.isLoggedIn(),
                 Toast.LENGTH_LONG).show();
@@ -80,6 +81,15 @@ public class LoginActivity extends Activity implements AsyncResponse {
                 login(intent);
             }
         });
+
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                startActivity(intent_register);
+            }
+        });
+
 
         }
 
