@@ -189,7 +189,8 @@ public class LoginActivity extends Activity implements AsyncResponse {
             if (message.equals("Login successful.")){
                 String priv_key = output.get("priv_key").toString();
                 String pub_key = output.get("pub_key").toString();
-                session.createUserLoginSession(loginEditText.getText().toString(),priv_key,pub_key);
+                String sessionCookie = output.get("sessionCookie").toString();
+                session.createUserLoginSession(loginEditText.getText().toString(),priv_key,pub_key,sessionCookie);
                 final Intent intent = new Intent(this, HomePage.class);
 
                 new android.os.Handler().postDelayed(
