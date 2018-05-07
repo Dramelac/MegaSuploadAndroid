@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.megasupload.megasuploadandroidapp.API.AsyncResponse;
 import com.megasupload.megasuploadandroidapp.API.HttpAsyncTask;
@@ -108,8 +109,39 @@ public class RegisterActivity extends Activity implements AsyncResponse {
     }
     @Override
     public void processFinish( Map<String, Object> output){
-        String message = output.get("message").toString();
-        session.createUserLoginSession(UsernameText.getText().toString());
+        try {
+            String message = output.get("message").toString();
+
+            final ProgressDialog progressDialog = new ProgressDialog(RegisterActivity.this, R.style.Theme_AppCompat_DayNight_Dialog);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setMessage("Registering...");
+            progressDialog.show();
+
+            if (message.equals("Registration successful.")){
+                String priv_key = output.get("priv_key").toString();
+                String pub_key = output.get("pub_key").toString();
+                session.createUserLoginSession(UsernameText.getText().toString(),priv_key,pub_key);
+                final Intent intent = new Intent(this, HomePage.class);
+
+                new android.os.Handler().postDelayed(
+                        new Runnable() {
+                            public void run() {
+
+                                startActivity(intent);
+                                progressDialog.dismiss();
+                            }
+                        }, 3000);
+            }
+            else {
+                Toast.makeText(getBaseContext(), "Registration failed. " + message, Toast.LENGTH_LONG).show();
+                progressDialog.dismiss();
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(getBaseContext(), "Error to contact server. Please try later.", Toast.LENGTH_LONG).show();
+            RegisterButton.setEnabled(true);
+        }
 
     }
 }
