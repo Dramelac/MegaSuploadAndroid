@@ -8,6 +8,9 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -29,7 +32,7 @@ import static com.megasupload.megasuploadandroidapp.UserSession.PREFER_NAME;
 import static com.megasupload.megasuploadandroidapp.UserSession.PUB_KEY;
 import static com.megasupload.megasuploadandroidapp.UserSession.SESSION_COOKIE;
 
-public class HomePage extends Activity implements AsyncResponse{
+public class HomePage extends AppCompatActivity implements AsyncResponse{
 
 
     @BindView(R.id.welcomeTextView)
@@ -37,9 +40,6 @@ public class HomePage extends Activity implements AsyncResponse{
 
     @BindView(R.id.ratio)
     TextView ratio;
-
-    @BindView(R.id.logoutButton)
-    Button logoutButton;
 
 
     private SharedPreferences sharedPreferences;
@@ -49,9 +49,10 @@ public class HomePage extends Activity implements AsyncResponse{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_page);
+        setContentView(R.layout.activity_home);
         session = new UserSession(getApplicationContext());
         ButterKnife.bind(this);
+        setTitle("Home");
 
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String name = sharedPreferences.getString(KEY_NAME, null);
@@ -74,13 +75,6 @@ public class HomePage extends Activity implements AsyncResponse{
             e.printStackTrace();
         }
 
-        logoutButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                session.logoutUser();
-            }
-        });
 
     }
     @Override
@@ -98,6 +92,24 @@ public class HomePage extends Activity implements AsyncResponse{
             Toast.makeText(getBaseContext(), "Error to contact server. Please try later.", Toast.LENGTH_LONG).show();
         }
 
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.profile:
+                /* DO EDIT */
+                return true;
+            case R.id.logout:
+                session.logoutUser();
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }
