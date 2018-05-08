@@ -53,7 +53,8 @@ public class RegisterActivity extends Activity implements AsyncResponse {
         setContentView(R.layout.activity_register);
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
-
+        session = new UserSession(getApplicationContext());
+        
         final Intent intent = new Intent(this, HomePage.class);
         RegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,16 +100,9 @@ public class RegisterActivity extends Activity implements AsyncResponse {
         loginTask.delegate = this;
         loginTask.execute(params);
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        startActivity(intent);
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
     }
     @Override
-    public void processFinish( Map<String, Object> output){
+    public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
         try {
             String message = output.get("message").toString();
 
@@ -120,7 +114,9 @@ public class RegisterActivity extends Activity implements AsyncResponse {
             if (message.equals("Registration successful.")){
                 String priv_key = output.get("priv_key").toString();
                 String pub_key = output.get("pub_key").toString();
-                session.createUserLoginSession(UsernameText.getText().toString(),priv_key,pub_key);
+                String sessionCookie = output.get("sessionCookie").toString();
+                String test = UsernameText.getText().toString();
+                session.createUserLoginSession(UsernameText.getText().toString(),priv_key,pub_key,sessionCookie);
                 final Intent intent = new Intent(this, HomePage.class);
 
                 new android.os.Handler().postDelayed(

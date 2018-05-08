@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/4PJT.iml" filepath="$PROJECT_DIR$/4PJT.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MegaSuploadAndroid.iml" filepath="$PROJECT_DIR$/MegaSuploadAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

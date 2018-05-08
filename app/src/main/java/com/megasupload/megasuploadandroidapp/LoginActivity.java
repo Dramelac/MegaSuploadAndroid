@@ -176,7 +176,7 @@ public class LoginActivity extends Activity implements AsyncResponse {
     }
 
     @Override
-    public void processFinish( Map<String, Object> output){
+    public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
 
         try {
             String message = output.get("message").toString();

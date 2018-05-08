@@ -11,6 +11,8 @@ import com.megasupload.megasuploadandroidapp.API.Params;
 
 import java.util.Map;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class UserSession implements AsyncResponse {
     public static final String PREFER_NAME = "Reg";
     public static final String IS_USER_LOGIN = "IsLoggedIn";
@@ -39,12 +41,15 @@ public class UserSession implements AsyncResponse {
     }
 
     public void logoutUser(){
+        preferences = context.getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
+        String sessionCookie = preferences.getString(SESSION_COOKIE, null);
         editor.clear();
         editor.commit();
         //Initialisation des paramètres nécéssaires pour la requete à l'API
         Params params = new Params();
         params.setUrl("https://megasupload.lsd-music.fr/api/auth/logout");
         params.setMethod("GET");
+        params.setSessionCookie(sessionCookie);
 
         HttpAsyncTask loginTask = new  HttpAsyncTask();
         loginTask.delegate = this;
