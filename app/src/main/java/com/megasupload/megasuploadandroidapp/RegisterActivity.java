@@ -3,13 +3,10 @@ package com.megasupload.megasuploadandroidapp;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.megasupload.megasuploadandroidapp.API.AsyncResponse;
@@ -66,14 +63,15 @@ public class RegisterActivity extends Activity implements AsyncResponse {
 
     public void register (final Intent intent) {
 
-
+        if(!validate()){
+            Toast.makeText(getBaseContext(), "Please fill all fields", Toast.LENGTH_LONG).show();
+            RegisterButton.setEnabled(true);
+            return;
+        }
         RegisterButton.setEnabled(false);
 
         final ProgressDialog progressDialog = new ProgressDialog(RegisterActivity.this,
                 R.style.Theme_AppCompat_DayNight_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Creating...");
-        progressDialog.show();
 
 
 
@@ -101,9 +99,40 @@ public class RegisterActivity extends Activity implements AsyncResponse {
         loginTask.execute(params);
 
     }
+
+    public boolean validate(){
+
+        boolean valid = true;
+        String username = UsernameText.getText().toString();
+        String email    = EmailText.getText().toString();
+        String pw1      = PasswordText.getText().toString();
+        String pw2      = PasswordConfText.getText().toString();
+
+        if (username.isEmpty()){
+            UsernameText.setError("Username field is empty");
+            valid = false;
+        }
+
+        if (email.isEmpty()){
+            EmailText.setError("Email field is empty");
+            valid = false;
+        }
+
+        if (pw1.isEmpty()){
+            PasswordText.setError("Password field is empty");
+            valid = false;
+        }
+        if (pw2.isEmpty()){
+            PasswordConfText.setError("Password confirmation field is empty");
+            valid = false;
+        }
+        return valid;
+    }
+
     @Override
     public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
         try {
+
             String message = output.get("message").toString();
 
             final ProgressDialog progressDialog = new ProgressDialog(RegisterActivity.this, R.style.Theme_AppCompat_DayNight_Dialog);
@@ -112,6 +141,7 @@ public class RegisterActivity extends Activity implements AsyncResponse {
             progressDialog.show();
 
             if (message.equals("Registration successful.")){
+                Toast.makeText(getBaseContext(),message, Toast.LENGTH_LONG).show();
                 String priv_key = output.get("priv_key").toString();
                 String pub_key = output.get("pub_key").toString();
                 String sessionCookie = output.get("sessionCookie").toString();
@@ -129,8 +159,29 @@ public class RegisterActivity extends Activity implements AsyncResponse {
                         }, 3000);
             }
             else {
-                Toast.makeText(getBaseContext(), "Registration failed. " + message, Toast.LENGTH_LONG).show();
+                if (message.equals("Passwords are different."))
+                {
+                    PasswordText.setError(message);
+                    PasswordConfText.setError(message);
+                }
+
+                if (message.equals("Password is too short. Should be at least 6 characters long."))
+                {
+                    PasswordText.setError(message);
+                }
+
+                if (message.equals("User already exist."))
+                {
+                    UsernameText.setError(message);
+                }
+
+                if (message.equals("Email address is not valid."))
+                {
+                    EmailText.setError(message);
+                }
+
                 progressDialog.dismiss();
+                RegisterButton.setEnabled(true);
             }
         }
         catch (Exception e){
