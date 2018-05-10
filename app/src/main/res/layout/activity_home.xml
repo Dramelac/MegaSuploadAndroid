@@ -25,43 +25,33 @@
         fab:menu_colorNormal="#00C29F"
         fab:menu_colorPressed="#00C29F"
         fab:menu_colorRipple="#00C29F"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:elevation="10dp">
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fabEdit"
+            android:id="@+id/addFile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/icon"
             fab:fab_size="mini"
             fab:fab_label="Add File"/>
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fabAddProduct"
+            android:id="@+id/addFolder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/icon"
             fab:fab_size="mini"
             fab:fab_label="Add Folder"/>
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fabAddSubcategory"
+            android:id="@+id/downloadFile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/icon"
             fab:fab_size="mini"
             fab:fab_label="Download File"/>
 
     </com.github.clans.fab.FloatingActionMenu>
 
-
-    <TextView
-        android:id="@+id/welcomeTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:text="Welcome to home Page"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp" />
-
+<!--
     <TextView
         android:id="@+id/ratio"
         android:layout_width="wrap_content"
@@ -72,5 +62,11 @@
         android:text="TextView"
         tools:layout_editor_absoluteX="181dp"
         tools:layout_editor_absoluteY="0dp" />
+-->
+
+    <ListView
+        android:id="@+id/ListFileFolder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></ListView>
 
 </android.support.design.widget.CoordinatorLayout>
