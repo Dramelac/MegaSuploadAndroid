@@ -12,12 +12,22 @@ tools:context=".HomePage">
     android:id="@+id/welcomeTextView"
     android:text="Welcome to home Page"
     />
-<Button
+
+    <Button
     android:id="@+id/logoutButton"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_alignParentRight = "true"
     android:text="Log Out"
      />
+
+    <TextView
+        android:id="@+id/ratio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/logoutButton"
+        android:text="TextView"
+        android:layout_toLeftOf="@+id/logoutButton" />
 
 </RelativeLayout>

@@ -7,6 +7,7 @@ public class Params {
     private String url;
     private String method;
     private JSONObject jsonObject;
+    private String sessionCookie;
 
     public String getUrl() {
         return url;
@@ -31,4 +32,13 @@ public class Params {
     public void setJsonObject(JSONObject jsonObject) {
         this.jsonObject = jsonObject;
     }
+
+    public String getSessionCookie() {
+        return sessionCookie;
+    }
+
+    public void setSessionCookie(String sessionCookie) {
+        this.sessionCookie = sessionCookie;
+    }
+
 }
