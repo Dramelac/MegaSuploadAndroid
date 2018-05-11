@@ -49,6 +49,8 @@ public class LoginActivity extends Activity implements AsyncResponse {
 
     UserSession session;
 
+    ProgressDialog progressDialog;
+
     private SharedPreferences sharedPreferences;
 
     static private boolean login_correct = false;
@@ -102,6 +104,11 @@ public class LoginActivity extends Activity implements AsyncResponse {
 
         final String userName = loginEditText.getText().toString();
 
+        progressDialog = new ProgressDialog(LoginActivity.this, R.style.Theme_AppCompat_DayNight_Dialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Authenticating...");
+        progressDialog.show();
+
         //Creation de l'objet en fonction des parametres qu'a besoin le requete à l'API
         JSONObject jsonObject = new JSONObject();
         try {
@@ -117,14 +124,14 @@ public class LoginActivity extends Activity implements AsyncResponse {
         params.setMethod("POST");
         params.setJsonObject(jsonObject);
 
-        try {
-            HttpAsyncTask loginTask = new  HttpAsyncTask();
-            loginTask.delegate = this;
-            loginTask.execute(params);
-        }catch (Exception e){
-            Toast.makeText(getBaseContext(), "Error to contact server. Please try later.", Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
+
+        HttpAsyncTask loginTask = new  HttpAsyncTask();
+        loginTask.delegate = this;
+        loginTask.execute(params);
+
+
+
+
     }
 
     @Override
@@ -181,11 +188,6 @@ public class LoginActivity extends Activity implements AsyncResponse {
         try {
             String message = output.get("message").toString();
 
-            final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this, R.style.Theme_AppCompat_DayNight_Dialog);
-            progressDialog.setIndeterminate(true);
-            progressDialog.setMessage("Authenticating...");
-            progressDialog.show();
-
             if (message.equals("Login successful.")){
                 String priv_key = output.get("priv_key").toString();
                 String pub_key = output.get("pub_key").toString();
@@ -210,6 +212,7 @@ public class LoginActivity extends Activity implements AsyncResponse {
         catch (Exception e){
             e.printStackTrace();
             Toast.makeText(getBaseContext(), "Error to contact server. Please try later.", Toast.LENGTH_LONG).show();
+            progressDialog.dismiss();
             loginButton.setEnabled(true);
         }
 
