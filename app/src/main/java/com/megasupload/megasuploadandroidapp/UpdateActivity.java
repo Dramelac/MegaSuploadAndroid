@@ -56,24 +56,25 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
 
     UserSession session;
 
+    Params params = new Params();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_profile);
         session = new UserSession(getApplicationContext());
         ButterKnife.bind(this);
+        HttpAsyncTask updatetask = new  HttpAsyncTask();
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
 
         //Initialisation des paramètres nécéssaires pour la requete à l'API
-        Params params = new Params();
         params.setUrl("https://megasupload.lsd-music.fr/api/user/get_profile");
         params.setMethod("GET");
         params.setSessionCookie(sessionCookie);
         final Intent intent = new Intent(this, HomePage.class);
-        HttpAsyncTask loginTask = new  HttpAsyncTask();
-        loginTask.delegate = this;
-        loginTask.execute(params);
+        updatetask.delegate = this;
+        updatetask.execute(params);
 
 
 
@@ -106,7 +107,6 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
         }
 
         //Initialisation des paramètres nécéssaires pour la requete à l'API
-        Params params = new Params();
         params.setUrl("https://megasupload.lsd-music.fr/api/user/update_profile");
         params.setMethod("POST");
         params.setJsonObject(jsonObject);
@@ -146,6 +146,7 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
             String email = output.get("email").toString();
             String first_name = output.get("first_name").toString();
             String last_name = output.get("last_name").toString();
+
             EmailText.setText(email);
             FirstnameText.setText(first_name);
             LastNameText.setText(last_name);
