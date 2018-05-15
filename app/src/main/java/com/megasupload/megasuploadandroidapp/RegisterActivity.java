@@ -51,7 +51,6 @@ public class RegisterActivity extends Activity implements AsyncResponse {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
         session = new UserSession(getApplicationContext());
-        
         final Intent intent = new Intent(this, HomePage.class);
         RegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
