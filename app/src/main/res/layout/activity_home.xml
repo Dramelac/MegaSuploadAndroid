@@ -43,7 +43,7 @@
             fab:fab_label="Add Folder"/>
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/downloadFile"
+            android:id="@+id/downloadFolder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             fab:fab_size="mini"
