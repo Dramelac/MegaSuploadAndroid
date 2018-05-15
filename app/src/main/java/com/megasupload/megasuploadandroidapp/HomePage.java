@@ -3,14 +3,17 @@ package com.megasupload.megasuploadandroidapp;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,11 +26,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionButton;
 import com.megasupload.megasuploadandroidapp.API.AsyncResponse;
 import com.megasupload.megasuploadandroidapp.API.HttpAsyncTask;
 import com.megasupload.megasuploadandroidapp.API.Params;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -54,6 +59,14 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
     @BindView(R.id.ListFileFolder)
     ListView listFileFolder;
 
+    @BindView(R.id.addFile)
+    FloatingActionButton addFile;
+
+    @BindView(R.id.addFolder)
+    FloatingActionButton addFolder;
+
+    @BindView(R.id.downloadFolder)
+    FloatingActionButton downloadFolder;
 
     private SharedPreferences sharedPreferences;
 
@@ -61,9 +74,12 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
 
     List<Item> items = new ArrayList<Item>();
 
-
+    String currentFolderName;
+    String currentFolderId;
 
     Params params = new Params();
+
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,30 +88,29 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
         session = new UserSession(getApplicationContext());
         ButterKnife.bind(this);
         setTitle("Home");
-        HttpAsyncTask homeTask = new  HttpAsyncTask();
+        final HttpAsyncTask homeTask = new  HttpAsyncTask();
 
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
 
-        //Initialisation des paramètres nécéssaires pour la requete à l'API
+        //Initialisation des paramètres nécéssaires pour la requete à l'API pour le ration
 
         params.setUrl("https://megasupload.lsd-music.fr/api/user/ratio");
         params.setMethod("GET");
         params.setSessionCookie(sessionCookie);
 
-
+        //Initialisation des paramètres nécéssaires pour la requete à l'API pour la récupération des dossiers/fichiers
         //homeTask.execute(params);
         homeTask.delegate = this;
         params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item");
         homeTask.execute(params);
 
-
-
-        listFileFolder.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
+        listFileFolder.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView,
-                                    View view, int position, long id) {
+            public void onItemClick(AdapterView<?> adapterView,View view, int position, long id) {
+
+
+                listFileFolder.setEnabled(false); //Eviter le crash avec le double click
 
                 Item selectedItem = items.get(position);
 
@@ -105,61 +120,149 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
                     setTitle(items.get(position).getName());
                     params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item?did="+items.get(position).getId());
                     homeTask.execute(params);
-                    items.clear();
 
                 }
-
-
             }
         });
+
+        //Ajout de fichier dans le dossier courant
+        addFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setTitle("testactionlist");
+            }
+        });
+
+        //Ajout de dossier dans le dossier courant
+        addFolder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
+                alert.setTitle("New Folder");
+                LayoutInflater inflater = getLayoutInflater();
+                View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
+                alert.setView(alertLayout);
+                final EditText newName = alertLayout.findViewById(R.id.newname);
+                alert.setCancelable(false);
+                alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String dirName = newName.getText().toString();
+
+
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.accumulate("dirId", currentFolderId);
+                            jsonObject.accumulate("name", dirName);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        //Initialisation des paramètres nécéssaires pour la requete à l'API
+                        params.setUrl("https://megasupload.lsd-music.fr/api/file/add_dir");
+                        params.setMethod("POST");
+                        params.setJsonObject(jsonObject);
+
+
+                        progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                        progressDialog.setIndeterminate(true);
+                        progressDialog.setMessage("Creating...");
+                        progressDialog.show();
+
+                        HttpAsyncTask createFolder = new  HttpAsyncTask();
+                        createFolder.delegate = HomePage.this;
+                        createFolder.execute(params);
+
+
+                    }
+                });
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                AlertDialog dialog = alert.create();
+                dialog.show();
+            }
+        });
+
+        downloadFolder.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                setTitle("testactionlist");
+            }
+        });
+
+
 
 
     }
     @Override
     public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
         try {
+            if (params.getMethod().equals("GET")){
+                items.clear(); //Supprime la liste des fichiers actuelle
+                String directoryResult = output.get("directory").toString();
+                String fileResult = output.get("file").toString();
 
-            String directoryResult = output.get("directory").toString();
-            String fileResult = output.get("file").toString();
+                fileResult = fileResult.replaceAll("/",""); //Pour eviter les erreurs lors de la transformation en Json array
 
-            fileResult = fileResult.replaceAll("/",""); //Pour eviter les erreurs lors de la transformation en Json array
-
-            JSONArray directory = new JSONArray(directoryResult);
+                JSONArray directory = new JSONArray(directoryResult);
 
 
-            for (int i=0; i<directory.length(); i++){
+                for (int i=0; i<directory.length(); i++){
 
-                JSONObject values = directory.getJSONObject(i);
-                Item item = new Item();
-                item.setDirectory(true);
-                item.setId(values.getString("id"));
-                item.setName(values.getString("name"));
-                if(!item.getName().equals(".")){
+                    JSONObject values = directory.getJSONObject(i);
+                    Item item = new Item();
+                    item.setDirectory(true);
+                    item.setId(values.getString("id"));
+                    item.setName(values.getString("name"));
+                    if(!item.getName().equals(".")){
+                        items.add(item);
+                    }
+                    else {
+                        currentFolderName = item.getName();
+                        currentFolderId = item.getId();
+                    }
+
+
+                }
+                JSONArray files = new JSONArray(fileResult);
+                for (int i=0; i<files.length(); i++){
+
+                    JSONObject values = files.getJSONObject(i);
+                    Item item = new Item();
+                    item.setDirectory(false);
+                    item.setId(values.getString("id"));
+                    item.setName(values.getString("name"));
                     items.add(item);
+
                 }
 
+                try {
+                    ItemAdapter adapter = new ItemAdapter(HomePage.this, items);
+                    listFileFolder.setAdapter(adapter);
+                    listFileFolder.setEnabled(true); //Eviter le crash avec le double click
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
 
             }
+            else {
+                params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item?did="+currentFolderId);
+                params.setMethod("GET");
 
-            JSONArray files = new JSONArray(fileResult);
-            for (int i=0; i<files.length(); i++){
-
-                JSONObject values = files.getJSONObject(i);
-                Item item = new Item();
-                item.setDirectory(false);
-                item.setId(values.getString("id"));
-                item.setName(values.getString("name"));
-                items.add(item);
-
+                HttpAsyncTask refreshview = new  HttpAsyncTask();
+                refreshview.delegate = HomePage.this;
+                refreshview.execute(params);
+                progressDialog.dismiss(); //Supprime la dialog quand un dossier/fichier est créé
             }
 
-            try {
-                ItemAdapter adapter = new ItemAdapter(HomePage.this, items);
-                listFileFolder.setAdapter(adapter);
 
-            }catch (Exception e){
-                e.printStackTrace();
-            }
             /*
             float dataUsed = Float.parseFloat(output.get("dataUsed").toString());
             long maxDataAllowed = Long.parseLong(output.get("maxDataAllowed").toString());
@@ -183,7 +286,6 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.profile:
-                /* DO EDIT */
                 final Intent intentProfil = new Intent(this,UpdateActivity.class);
                 startActivity(intentProfil);
                 return true;
