@@ -184,6 +184,8 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
         switch (item.getItemId()) {
             case R.id.profile:
                 /* DO EDIT */
+                final Intent intentProfil = new Intent(this,UpdateActivity.class);
+                startActivity(intentProfil);
                 return true;
             case R.id.logout:
                 session.logoutUser();
