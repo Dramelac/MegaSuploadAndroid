@@ -10,10 +10,12 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -59,6 +61,10 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
 
     List<Item> items = new ArrayList<Item>();
 
+
+
+    Params params = new Params();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,22 +72,46 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
         session = new UserSession(getApplicationContext());
         ButterKnife.bind(this);
         setTitle("Home");
+        HttpAsyncTask homeTask = new  HttpAsyncTask();
 
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
 
         //Initialisation des paramètres nécéssaires pour la requete à l'API
-        Params params = new Params();
+
         params.setUrl("https://megasupload.lsd-music.fr/api/user/ratio");
         params.setMethod("GET");
         params.setSessionCookie(sessionCookie);
 
-        HttpAsyncTask loginTask = new  HttpAsyncTask();
-        loginTask.delegate = this;
-        //loginTask.execute(params);
 
+        //homeTask.execute(params);
+        homeTask.delegate = this;
         params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item");
-        loginTask.execute(params);
+        homeTask.execute(params);
+
+
+
+        listFileFolder.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView,
+                                    View view, int position, long id) {
+
+                Item selectedItem = items.get(position);
+
+                if (selectedItem.getDirectory()){
+                    HttpAsyncTask homeTask = new  HttpAsyncTask();
+                    homeTask.delegate = HomePage.this;
+                    setTitle(items.get(position).getName());
+                    params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item?did="+items.get(position).getId());
+                    homeTask.execute(params);
+                    items.clear();
+
+                }
+
+
+            }
+        });
 
 
     }
@@ -89,15 +119,12 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
     public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
         try {
 
-            String test = output.get("directory").toString();
-            String test2 = output.get("file").toString();
+            String directoryResult = output.get("directory").toString();
+            String fileResult = output.get("file").toString();
 
-            test2 = test2.replaceAll("/","");
-            //test2 = test2.replaceAll("\\[|\\]" , "");
-            //String chara = test2.substring(301,302);
-            System.out.print(test2);
+            fileResult = fileResult.replaceAll("/",""); //Pour eviter les erreurs lors de la transformation en Json array
 
-            JSONArray directory = new JSONArray(test);
+            JSONArray directory = new JSONArray(directoryResult);
 
 
             for (int i=0; i<directory.length(); i++){
@@ -107,11 +134,14 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
                 item.setDirectory(true);
                 item.setId(values.getString("id"));
                 item.setName(values.getString("name"));
-                items.add(item);
+                if(!item.getName().equals(".")){
+                    items.add(item);
+                }
+
 
             }
 
-            JSONArray files = new JSONArray(test2);
+            JSONArray files = new JSONArray(fileResult);
             for (int i=0; i<files.length(); i++){
 
                 JSONObject values = files.getJSONObject(i);
@@ -162,6 +192,9 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+
 
 }
 
