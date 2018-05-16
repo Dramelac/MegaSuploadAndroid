@@ -23,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,7 +52,7 @@ import static com.megasupload.megasuploadandroidapp.UserSession.PREFER_NAME;
 import static com.megasupload.megasuploadandroidapp.UserSession.PUB_KEY;
 import static com.megasupload.megasuploadandroidapp.UserSession.SESSION_COOKIE;
 
-public class HomePage extends AppCompatActivity implements AsyncResponse{
+public class HomePage extends AppCompatActivity implements AsyncResponse,ItemAdapter.customButtonListener {
 
 
   /*  @BindView(R.id.ratio)
@@ -85,6 +86,8 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
 
     ProgressDialog progressDialog;
 
+    ItemAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,9 +112,11 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
         params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item");
         homeTask.execute(params);
 
+
         listFileFolder.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView,View view, int position, long id) {
+
 
                 listFileFolder.setEnabled(false); //Eviter le crash avec le double click
 
@@ -295,7 +300,8 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
                 }
 
                 try {
-                    ItemAdapter adapter = new ItemAdapter(HomePage.this, items);
+                    adapter = new ItemAdapter(HomePage.this, items);
+                    adapter.setCustomButtonListner(HomePage.this);
                     listFileFolder.setAdapter(adapter);
                     listFileFolder.setEnabled(true); //Eviter le crash avec le double click
 
@@ -308,13 +314,12 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
                 params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item?did="+currentFolderId);
                 params.setMethod("GET");
 
-                HttpAsyncTask refreshview = new  HttpAsyncTask();
-                refreshview.delegate = HomePage.this;
-                refreshview.execute(params);
+                HttpAsyncTask refreshView = new  HttpAsyncTask();
+                refreshView.delegate = HomePage.this;
+                refreshView.execute(params);
                 progressDialog.dismiss(); //Supprime la dialog quand un dossier/fichier est créé
                 floatingMenu.close(true); //Fait disparaitre le foating menu après la création d'un dossier/fichier
             }
-
 
             /*
             float dataUsed = Float.parseFloat(output.get("dataUsed").toString());
@@ -348,6 +353,13 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onButtonClickListner(int position, String value) {   //Override du click lister de la classe ItemAdaptater du bouton details
+        Toast.makeText(HomePage.this, "Button click " + value,
+                Toast.LENGTH_SHORT).show();
+
     }
 
 

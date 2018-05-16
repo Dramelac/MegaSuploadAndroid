@@ -129,9 +129,6 @@ public class LoginActivity extends Activity implements AsyncResponse {
         loginTask.delegate = this;
         loginTask.execute(params);
 
-
-
-
     }
 
     @Override
