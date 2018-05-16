@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MegaSuploadAndroidApp</string>
+    <string name="title_activity_update">UpdateActivity</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>

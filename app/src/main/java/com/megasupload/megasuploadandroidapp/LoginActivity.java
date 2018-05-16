@@ -32,6 +32,7 @@ public class LoginActivity extends Activity implements AsyncResponse {
     private static final int REQUEST_SIGNUP = 0;
     private static final String PREFER_NAME = "Reg";
 
+
     @BindView(R.id.loginEditText)
     EditText loginEditText;
 
@@ -41,16 +42,18 @@ public class LoginActivity extends Activity implements AsyncResponse {
     @BindView(R.id.loginButton)
     Button loginButton;
 
-    @BindView(R.id.cancel)
-    Button cancel;
+    @BindView(R.id.register)
+    Button registerButton;
 
     int counter = 3;
 
     UserSession session;
 
+    ProgressDialog progressDialog;
+
     private SharedPreferences sharedPreferences;
 
-    private boolean ok = false;
+    static private boolean login_correct = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,11 +63,9 @@ public class LoginActivity extends Activity implements AsyncResponse {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
-
         final Intent intent = new Intent(this, HomePage.class);
+        final Intent intent_register = new Intent(this, RegisterActivity.class);
         session = new UserSession(getApplicationContext());
-        Toast.makeText(getApplicationContext(), "User Login Status: " + session.isLoggedIn(),
-                Toast.LENGTH_LONG).show();
 
         if (session.isLoggedIn()) {
             startActivity(intent);
@@ -81,6 +82,15 @@ public class LoginActivity extends Activity implements AsyncResponse {
             }
         });
 
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                startActivity(intent_register);
+            }
+        });
+
+
         }
 
     public void login (final Intent intent) {
@@ -92,13 +102,12 @@ public class LoginActivity extends Activity implements AsyncResponse {
 
         loginButton.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
-                R.style.Theme_AppCompat_DayNight_Dialog);
+        final String userName = loginEditText.getText().toString();
+
+        progressDialog = new ProgressDialog(LoginActivity.this, R.style.Theme_AppCompat_DayNight_Dialog);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
-
-        final String userName = loginEditText.getText().toString();
 
         //Creation de l'objet en fonction des parametres qu'a besoin le requete à l'API
         JSONObject jsonObject = new JSONObject();
@@ -115,27 +124,20 @@ public class LoginActivity extends Activity implements AsyncResponse {
         params.setMethod("POST");
         params.setJsonObject(jsonObject);
 
+
         HttpAsyncTask loginTask = new  HttpAsyncTask();
         loginTask.delegate = this;
         loginTask.execute(params);
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        onLoginSuccess();
-                        startActivity(intent);
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+
+
+
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
-
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
                 this.finish();
             }
         }
@@ -154,8 +156,7 @@ public class LoginActivity extends Activity implements AsyncResponse {
     }
 
     public void onLoginFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
-
+        Toast.makeText(getBaseContext(), "Login incorrect", Toast.LENGTH_LONG).show();
         loginButton.setEnabled(true);
     }
 
@@ -163,6 +164,7 @@ public class LoginActivity extends Activity implements AsyncResponse {
         boolean valid = true;
 
         String userName = loginEditText.getText().toString();
+        String password = passwordEditText.getText().toString();
 
         if (userName.isEmpty()) {
             loginEditText.setError("enter an UserName");
@@ -170,14 +172,52 @@ public class LoginActivity extends Activity implements AsyncResponse {
         } else {
             loginEditText.setError(null);
         }
+        if (password.isEmpty()) {
+            passwordEditText.setError("enter an Password");
+            valid = false;
+        } else {
+            passwordEditText.setError(null);
+        }
 
         return valid;
     }
 
     @Override
-    public void processFinish( Map<String, Object> output){
-        String test1 = output.get("message").toString();
-        session.createUserLoginSession(loginEditText.getText().toString());
+    public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
+
+        try {
+            String message = output.get("message").toString();
+
+            if (message.equals("Login successful.")){
+                String priv_key = output.get("priv_key").toString();
+                String pub_key = output.get("pub_key").toString();
+                String sessionCookie = output.get("sessionCookie").toString();
+                session.createUserLoginSession(loginEditText.getText().toString(),priv_key,pub_key,sessionCookie);
+                final Intent intent = new Intent(this, HomePage.class);
+
+                new android.os.Handler().postDelayed(
+                        new Runnable() {
+                            public void run() {
+                                onLoginSuccess();
+                                startActivity(intent);
+                                progressDialog.dismiss();
+                            }
+                        }, 3000);
+            }
+            else {
+                onLoginFailed();
+                progressDialog.dismiss();
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(getBaseContext(), "Error to contact server. Please try later.", Toast.LENGTH_LONG).show();
+            progressDialog.dismiss();
+            loginButton.setEnabled(true);
+        }
+
+
+
 
     }
 
