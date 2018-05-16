@@ -14,12 +14,12 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class ItemAdapter extends ArrayAdapter<Item>  {
+public class ItemAdapter extends ArrayAdapter<Item> {
 
     customButtonListener customListner;
 
     public interface customButtonListener {
-        public void onButtonClickListner(int position,String value);
+        public void onButtonClickListner(int position, String value);
     }
 
     public void setCustomButtonListner(customButtonListener listener) {
@@ -33,12 +33,12 @@ public class ItemAdapter extends ArrayAdapter<Item>  {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
 
-        if(convertView == null){
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_item,parent, false);
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_item, parent, false);
         }
 
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
-        if(viewHolder == null){
+        if (viewHolder == null) {
             viewHolder = new ViewHolder();
             viewHolder.name = (TextView) convertView.findViewById(R.id.name);
             viewHolder.itemIcon = (ImageView) convertView.findViewById(R.id.itemIcon);
@@ -48,14 +48,13 @@ public class ItemAdapter extends ArrayAdapter<Item>  {
 
         final Item item = getItem(position);
 
-        if (item.getDirectory()){
+        if (item.getDirectory()) {
             viewHolder.name.setText(item.getName());
             viewHolder.itemIcon.setImageResource(R.drawable.folder);
-            if (item.getName().equals("..")){
+            if (item.getName().equals("..")) {
                 viewHolder.detailsButton.setVisibility(View.GONE);
             }
-        }
-        else{
+        } else {
             viewHolder.name.setText(item.getName());
             viewHolder.itemIcon.setImageResource(R.drawable.file);
         }
@@ -66,7 +65,7 @@ public class ItemAdapter extends ArrayAdapter<Item>  {
                 final String id = item.getId();
 
                 if (customListner != null) {
-                    customListner.onButtonClickListner(position,id);
+                    customListner.onButtonClickListner(position, id);
                 }
 
 
@@ -76,7 +75,7 @@ public class ItemAdapter extends ArrayAdapter<Item>  {
         return convertView;
     }
 
-    private class ViewHolder{
+    private class ViewHolder {
         public TextView name;
         public ImageView itemIcon;
         public Button detailsButton;

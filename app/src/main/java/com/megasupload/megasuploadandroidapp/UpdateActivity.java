@@ -29,7 +29,6 @@ import static com.megasupload.megasuploadandroidapp.UserSession.SESSION_COOKIE;
 
 public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
 
-    
 
     @BindView(R.id.emailText)
     EditText EmailText;
@@ -66,7 +65,7 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
         setContentView(R.layout.activity_update_profile);
         session = new UserSession(getApplicationContext());
         ButterKnife.bind(this);
-        HttpAsyncTask updatetask = new  HttpAsyncTask();
+        HttpAsyncTask updatetask = new HttpAsyncTask();
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
 
@@ -91,11 +90,10 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
         });
 
 
-
-
     }
-    public void update(final Intent intent){
-        if(!validate()){
+
+    public void update(final Intent intent) {
+        if (!validate()) {
             Toast.makeText(getBaseContext(), "Please fill all fields", Toast.LENGTH_LONG).show();
             updateButton.setEnabled(true);
             return;
@@ -104,7 +102,6 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
 
         final ProgressDialog progressDialog = new ProgressDialog(UpdateActivity.this,
                 R.style.Theme_AppCompat_DayNight_Dialog);
-
 
 
         //Creation de l'objet en fonction des parametres qu'a besoin le requete à l'API
@@ -125,20 +122,20 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
         params.setMethod("POST");
         params.setJsonObject(jsonObject);
 
-        HttpAsyncTask loginTask = new  HttpAsyncTask();
+        HttpAsyncTask loginTask = new HttpAsyncTask();
         loginTask.delegate = this;
         loginTask.execute(params);
     }
 
-    public boolean validate(){
+    public boolean validate() {
 
         boolean valid = true;
-        String email        = EmailText.getText().toString();
+        String email = EmailText.getText().toString();
         //String firstname    = FirstnameText.getText().toString();
         //String lastname     = LastNameText.getText().toString();
 
 
-        if (email.isEmpty()){
+        if (email.isEmpty()) {
             EmailText.setError("Email field is empty");
             valid = false;
         }
@@ -154,11 +151,11 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
         return valid;
     }
 
-    public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
+    public void processFinish(Map<String, Object> output) { //S'éxécute à chaque fin de requete à l'API
 
         try {
             updateButton.setEnabled(false);
-            if (params.getMethod().equals("GET")){
+            if (params.getMethod().equals("GET")) {
                 String email = output.get("email").toString();
                 String first_name = output.get("first_name").toString();
                 String last_name = output.get("last_name").toString();
@@ -167,32 +164,28 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
                 LastNameText.setText(last_name);
                 updateButton.setEnabled(true);
             }
-            if (params.getMethod().equals("POST")){
+            if (params.getMethod().equals("POST")) {
                 String message = output.get("message").toString();
 
 
-                if (message.equals("Update successful.")){
-                    Toast.makeText(getBaseContext(),message, Toast.LENGTH_LONG).show();
+                if (message.equals("Update successful.")) {
+                    Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
                     final Intent intent = new Intent(this, HomePage.class);
 
                     progressDialog.dismiss();
                     startActivity(intent);
-                }
-                else {
-                    if (message.equals("Passwords are different."))
-                    {
+                } else {
+                    if (message.equals("Passwords are different.")) {
                         PasswordText.setError(message);
                         PasswordConfText.setError(message);
                     }
 
-                    if (message.equals("Password is too short. Should be at least 6 characters long."))
-                    {
+                    if (message.equals("Password is too short. Should be at least 6 characters long.")) {
                         PasswordText.setError(message);
                     }
 
 
-                    if (message.equals("Email address is not valid."))
-                    {
+                    if (message.equals("Email address is not valid.")) {
                         EmailText.setError(message);
                     }
 
@@ -201,9 +194,9 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
                 }
 
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             updateButton.setEnabled(true);
         }
 
-}}
+    }
+}
