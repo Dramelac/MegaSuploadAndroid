@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.megasupload.megasuploadandroidapp.API.AsyncResponse;
 import com.megasupload.megasuploadandroidapp.API.HttpAsyncTask;
 import com.megasupload.megasuploadandroidapp.API.Params;
@@ -67,6 +68,9 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
 
     @BindView(R.id.downloadFolder)
     FloatingActionButton downloadFolder;
+
+    @BindView(R.id.floatingMenu)
+    FloatingActionMenu floatingMenu;
 
     private SharedPreferences sharedPreferences;
 
@@ -109,7 +113,6 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
             @Override
             public void onItemClick(AdapterView<?> adapterView,View view, int position, long id) {
 
-
                 listFileFolder.setEnabled(false); //Eviter le crash avec le double click
 
                 Item selectedItem = items.get(position);
@@ -129,7 +132,54 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
         addFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setTitle("testactionlist");
+                AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
+                alert.setTitle("New File");
+                LayoutInflater inflater = getLayoutInflater();
+                View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
+                alert.setView(alertLayout);
+                final EditText newName = alertLayout.findViewById(R.id.newname);
+                alert.setCancelable(false);
+                alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String dirName = newName.getText().toString();
+
+
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.accumulate("dirId", currentFolderId);
+                            jsonObject.accumulate("name", dirName);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        //Initialisation des paramètres nécéssaires pour la requete à l'API
+                        params.setUrl("https://megasupload.lsd-music.fr/api/file/add_dir");
+                        params.setMethod("POST");
+                        params.setJsonObject(jsonObject);
+
+
+                        progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                        progressDialog.setIndeterminate(true);
+                        progressDialog.setMessage("Creating...");
+                        progressDialog.show();
+
+                        HttpAsyncTask createFolder = new  HttpAsyncTask();
+                        createFolder.delegate = HomePage.this;
+                        createFolder.execute(params);
+
+
+                    }
+                });
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                AlertDialog dialog = alert.create();
+                dialog.show();
             }
         });
 
@@ -204,7 +254,9 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
     public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
         try {
             if (params.getMethod().equals("GET")){
-                items.clear(); //Supprime la liste des fichiers actuelle
+                if (items !=null){
+                    items.clear(); //Supprime la liste des fichiers actuelle
+                }
                 String directoryResult = output.get("directory").toString();
                 String fileResult = output.get("file").toString();
 
@@ -213,14 +265,14 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
                 JSONArray directory = new JSONArray(directoryResult);
 
 
-                for (int i=0; i<directory.length(); i++){
+                for (int i=1; i<=directory.length(); i++){
 
-                    JSONObject values = directory.getJSONObject(i);
+                    JSONObject values = directory.getJSONObject(directory.length() - i);
                     Item item = new Item();
                     item.setDirectory(true);
                     item.setId(values.getString("id"));
                     item.setName(values.getString("name"));
-                    if(!item.getName().equals(".")){
+                    if(!item.getName().equals(".")){ //Evite d'afficher le dossier '.' (dossier actuel)
                         items.add(item);
                     }
                     else {
@@ -260,6 +312,7 @@ public class HomePage extends AppCompatActivity implements AsyncResponse{
                 refreshview.delegate = HomePage.this;
                 refreshview.execute(params);
                 progressDialog.dismiss(); //Supprime la dialog quand un dossier/fichier est créé
+                floatingMenu.close(true); //Fait disparaitre le foating menu après la création d'un dossier/fichier
             }
 
 

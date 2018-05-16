@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,6 +32,7 @@ public class ItemAdapter extends ArrayAdapter<Item> {
             viewHolder = new ViewHolder();
             viewHolder.name = (TextView) convertView.findViewById(R.id.name);
             viewHolder.itemIcon = (ImageView) convertView.findViewById(R.id.itemIcon);
+            //viewHolder.detailsButton = (Button) convertView.findViewById(R.id.detailsButton);
             convertView.setTag(viewHolder);
         }
 
@@ -45,14 +47,12 @@ public class ItemAdapter extends ArrayAdapter<Item> {
             viewHolder.itemIcon.setImageResource(R.drawable.file);
         }
 
-
-
-
         return convertView;
     }
 
     private class ViewHolder{
         public TextView name;
         public ImageView itemIcon;
+        //public Button detailsButton;
     }
 }
