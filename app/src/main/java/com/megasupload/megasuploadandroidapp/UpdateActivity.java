@@ -58,6 +58,8 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
 
     Params params = new Params();
 
+    ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +77,18 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
         final Intent intent = new Intent(this, HomePage.class);
         updatetask.delegate = this;
         updatetask.execute(params);
+
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                progressDialog = new ProgressDialog(UpdateActivity.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setMessage("Updating...");
+                progressDialog.show();
+
+                update(intent);
+            }
+        });
 
 
 
@@ -120,8 +134,8 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
 
         boolean valid = true;
         String email        = EmailText.getText().toString();
-        String firstname    = FirstnameText.getText().toString();
-        String lastname     = LastNameText.getText().toString();
+        //String firstname    = FirstnameText.getText().toString();
+        //String lastname     = LastNameText.getText().toString();
 
 
         if (email.isEmpty()){
@@ -129,35 +143,66 @@ public class UpdateActivity extends AppCompatActivity implements AsyncResponse {
             valid = false;
         }
 
-        if (firstname.isEmpty()){
+        /*if (firstname.isEmpty()){
             FirstnameText.setError("Firstname field is empty");
             valid = false;
         }
         if (lastname.isEmpty()){
             LastNameText.setError("Lastname confirmation field is empty");
             valid = false;
-        }
+        }*/
         return valid;
     }
 
     public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
 
         try {
-            String email = output.get("email").toString();
-            String first_name = output.get("first_name").toString();
-            String last_name = output.get("last_name").toString();
+            updateButton.setEnabled(false);
+            if (params.getMethod().equals("GET")){
+                String email = output.get("email").toString();
+                String first_name = output.get("first_name").toString();
+                String last_name = output.get("last_name").toString();
+                EmailText.setText(email);
+                FirstnameText.setText(first_name);
+                LastNameText.setText(last_name);
+                updateButton.setEnabled(true);
+            }
+            if (params.getMethod().equals("POST")){
+                String message = output.get("message").toString();
 
-            EmailText.setText(email);
-            FirstnameText.setText(first_name);
-            LastNameText.setText(last_name);
 
-            String message = output.get("message").toString();
+                if (message.equals("Update successful.")){
+                    Toast.makeText(getBaseContext(),message, Toast.LENGTH_LONG).show();
+                    final Intent intent = new Intent(this, HomePage.class);
+
+                    progressDialog.dismiss();
+                    startActivity(intent);
+                }
+                else {
+                    if (message.equals("Passwords are different."))
+                    {
+                        PasswordText.setError(message);
+                        PasswordConfText.setError(message);
+                    }
+
+                    if (message.equals("Password is too short. Should be at least 6 characters long."))
+                    {
+                        PasswordText.setError(message);
+                    }
 
 
+                    if (message.equals("Email address is not valid."))
+                    {
+                        EmailText.setError(message);
+                    }
+
+                    progressDialog.dismiss();
+                    updateButton.setEnabled(true);
+                }
+
+            }
         }
         catch (Exception e){
-            e.printStackTrace();
-            Toast.makeText(getBaseContext(), "Error to contact server. Please try later.", Toast.LENGTH_LONG).show();
             updateButton.setEnabled(true);
         }
 
