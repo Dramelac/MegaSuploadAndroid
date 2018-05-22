@@ -269,25 +269,27 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
                 if (output.containsKey("dataUsed")) {
 
+                    int intLogDataUsed = 0;
+                    String stringDataUsed = String.valueOf(0);
+                    DecimalFormat decimalFormatDataUsed = new DecimalFormat("0.##");
+                    DecimalFormat decimalFormatDataAllowed = new DecimalFormat("0");
+
                     double dataUsed = Double.parseDouble(output.get("dataUsed").toString());
                     double dataAllowed = Double.parseDouble(output.get("maxDataAllowed").toString());
 
                     String extensions[] = {"B", "kB", "MB", "GB", "TB"};
 
                     double logDataUsed = Math.floor(Math.log(dataUsed) / Math.log(1024));
-                    int intLogDataUsed = (int) logDataUsed;
+                    if (dataUsed != 0){
+                        intLogDataUsed = (int) logDataUsed;
+                        stringDataUsed = String.valueOf(decimalFormatDataUsed.format(dataUsed / Math.pow(1024, intLogDataUsed)));
+                    }
 
                     double logDataAllowed = Math.floor(Math.log(dataAllowed) / Math.log(1024));
                     int intLogDataAllowed = (int) logDataAllowed;
-
-
-                    DecimalFormat decimalFormatDataUsed = new DecimalFormat("0.##");
-                    DecimalFormat decimalFormatDataAllowed = new DecimalFormat("0");
+                    String stringDataAllowed = String.valueOf(decimalFormatDataAllowed.format(dataAllowed / Math.pow(1024, intLogDataAllowed)));
 
                     MenuItem ratioTitle = menu.findItem(R.id.ratio);
-
-                    String stringDataUsed = String.valueOf(decimalFormatDataUsed.format(dataUsed / Math.pow(1024, intLogDataUsed)));
-                    String stringDataAllowed = String.valueOf(decimalFormatDataAllowed.format(dataAllowed / Math.pow(1024, intLogDataAllowed)));
 
                     ratioTitle.setTitle(stringDataUsed + " " + extensions[intLogDataUsed] + " / " + stringDataAllowed + " " + extensions[intLogDataAllowed]);
 
