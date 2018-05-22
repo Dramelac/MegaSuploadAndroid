@@ -19,7 +19,7 @@ public class ItemAdapter extends ArrayAdapter<Item> {
     customButtonListener customListner;
 
     public interface customButtonListener {
-        public void onButtonClickListner(int position, String value);
+        public void onButtonClickListner(int position, String id, String name);
     }
 
     public void setCustomButtonListner(customButtonListener listener) {
@@ -63,9 +63,10 @@ public class ItemAdapter extends ArrayAdapter<Item> {
             @Override
             public void onClick(View v) {
                 final String id = item.getId();
+                final String name = item.getName();
 
                 if (customListner != null) {
-                    customListner.onButtonClickListner(position, id);
+                    customListner.onButtonClickListner(position, id, name);
                 }
 
 

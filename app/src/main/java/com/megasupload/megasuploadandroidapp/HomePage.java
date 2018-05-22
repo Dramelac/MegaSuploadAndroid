@@ -259,7 +259,7 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
         try {
             if (params.getMethod().equals("GET")) {
                 if (items != null) {
-                    items.clear(); //Supprime la liste des fichiers actuelle
+                    items.clear(); //Supprime la liste des fichiers actuels
                 }
                 String directoryResult = output.get("directory").toString();
                 String fileResult = output.get("file").toString();
@@ -352,9 +352,11 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
     }
 
     @Override
-    public void onButtonClickListner(int position, String value) {   //Override du click lister de la classe ItemAdaptater du bouton details
-        Toast.makeText(HomePage.this, "Button click " + value,
-                Toast.LENGTH_SHORT).show();
+    public void onButtonClickListner(int position, String id, String name) {   //Override du click lister de la classe ItemAdaptater du bouton details
+        Intent intentFolder = new Intent(this, FolderView.class);
+        intentFolder.putExtra("name",name);
+        intentFolder.putExtra("id",id);
+        startActivity(intentFolder);
 
     }
 
