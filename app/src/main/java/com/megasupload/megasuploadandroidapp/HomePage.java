@@ -37,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -54,9 +55,6 @@ import static com.megasupload.megasuploadandroidapp.UserSession.SESSION_COOKIE;
 
 public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAdapter.customButtonListener {
 
-
-  /*  @BindView(R.id.ratio)
-    TextView ratio;*/
 
     @BindView(R.id.ListFileFolder)
     ListView listFileFolder;
@@ -84,9 +82,14 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
     Params params = new Params();
 
+    Params ratioParams = new Params(); //A utiliser pour les requetes du ratio
+
     ProgressDialog progressDialog;
 
     ItemAdapter adapter;
+
+    Menu menu;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,21 +98,26 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
         session = new UserSession(getApplicationContext());
         ButterKnife.bind(this);
         setTitle("Home");
-        final HttpAsyncTask homeTask = new HttpAsyncTask();
+
 
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
 
         //Initialisation des paramètres nécéssaires pour la requete à l'API pour le ration
+        final HttpAsyncTask ratioTask = new HttpAsyncTask();
+        ratioParams.setUrl("https://megasupload.lsd-music.fr/api/user/ratio");
+        ratioParams.setMethod("GET");
+        ratioParams.setSessionCookie(sessionCookie);
+        ratioTask.delegate = this;
+        ratioTask.execute(ratioParams);
 
-        params.setUrl("https://megasupload.lsd-music.fr/api/user/ratio");
-        params.setMethod("GET");
-        params.setSessionCookie(sessionCookie);
 
         //Initialisation des paramètres nécéssaires pour la requete à l'API pour la récupération des dossiers/fichiers
-        //homeTask.execute(params);
+        final HttpAsyncTask homeTask = new HttpAsyncTask();
         homeTask.delegate = this;
         params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item");
+        params.setSessionCookie(sessionCookie);
+        params.setMethod("GET");
         homeTask.execute(params);
 
 
@@ -258,73 +266,105 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
     public void processFinish(Map<String, Object> output) { //S'éxécute à chaque fin de requete à l'API
         try {
             if (params.getMethod().equals("GET")) {
-                if (items != null) {
-                    items.clear(); //Supprime la liste des fichiers actuels
+
+                if (output.containsKey("dataUsed")) {
+
+                    double dataUsed = Double.parseDouble(output.get("dataUsed").toString());
+                    double dataAllowed = Double.parseDouble(output.get("maxDataAllowed").toString());
+
+                    String extensions[] = {"B", "kB", "MB", "GB", "TB"};
+
+                    double logDataUsed = Math.floor(Math.log(dataUsed) / Math.log(1024));
+                    int intLogDataUsed = (int) logDataUsed;
+
+                    double logDataAllowed = Math.floor(Math.log(dataAllowed) / Math.log(1024));
+                    int intLogDataAllowed = (int) logDataAllowed;
+
+
+                    DecimalFormat decimalFormatDataUsed = new DecimalFormat("0.##");
+                    DecimalFormat decimalFormatDataAllowed = new DecimalFormat("0");
+
+                    MenuItem ratioTitle = menu.findItem(R.id.ratio);
+
+                    String stringDataUsed = String.valueOf(decimalFormatDataUsed.format(dataUsed / Math.pow(1024, intLogDataUsed)));
+                    String stringDataAllowed = String.valueOf(decimalFormatDataAllowed.format(dataAllowed / Math.pow(1024, intLogDataAllowed)));
+
+                    ratioTitle.setTitle(stringDataUsed + " " + extensions[intLogDataUsed] + " / " + stringDataAllowed + " " + extensions[intLogDataAllowed]);
+
                 }
-                String directoryResult = output.get("directory").toString();
-                String fileResult = output.get("file").toString();
 
-                fileResult = fileResult.replaceAll("/", ""); //Pour eviter les erreurs lors de la transformation en Json array
-
-                JSONArray directory = new JSONArray(directoryResult);
-
-
-                for (int i = 1; i <= directory.length(); i++) {
-
-                    JSONObject values = directory.getJSONObject(directory.length() - i);
-                    Item item = new Item();
-                    item.setDirectory(true);
-                    item.setId(values.getString("id"));
-                    item.setName(values.getString("name"));
-                    if (!item.getName().equals(".")) { //Evite d'afficher le dossier '.' (dossier actuel)
-                        items.add(item);
-                    } else {
-                        currentFolderName = item.getName();
-                        currentFolderId = item.getId();
+                if (output.containsKey("directory")) {
+                    if (items != null) {
+                        items.clear(); //Supprime la liste des fichiers actuels
                     }
 
+                    String directoryResult = output.get("directory").toString();
+                    String fileResult = output.get("file").toString();
+
+                    fileResult = fileResult.replaceAll("/", ""); //Pour eviter les erreurs lors de la transformation en Json array
+
+                    JSONArray directory = new JSONArray(directoryResult);
+
+
+                    for (int i = 1; i <= directory.length(); i++) {
+
+                        JSONObject values = directory.getJSONObject(directory.length() - i);
+                        Item item = new Item();
+                        item.setDirectory(true);
+                        item.setId(values.getString("id"));
+                        item.setName(values.getString("name"));
+                        if (!item.getName().equals(".")) { //Evite d'afficher le dossier '.' (dossier actuel)
+                            items.add(item);
+                        } else {
+                            currentFolderName = item.getName();
+                            currentFolderId = item.getId();
+                        }
+
+
+                    }
+                    JSONArray files = new JSONArray(fileResult);
+                    for (int i = 0; i < files.length(); i++) {
+
+                        JSONObject values = files.getJSONObject(i);
+                        Item item = new Item();
+                        item.setDirectory(false);
+                        item.setId(values.getString("id"));
+                        item.setName(values.getString("name"));
+                        items.add(item);
+
+                    }
+
+                    try {
+                        adapter = new ItemAdapter(HomePage.this, items);
+                        adapter.setCustomButtonListner(HomePage.this);
+                        listFileFolder.setAdapter(adapter);
+                        listFileFolder.setEnabled(true); //Eviter le crash avec le double click
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
                 }
-                JSONArray files = new JSONArray(fileResult);
-                for (int i = 0; i < files.length(); i++) {
 
-                    JSONObject values = files.getJSONObject(i);
-                    Item item = new Item();
-                    item.setDirectory(false);
-                    item.setId(values.getString("id"));
-                    item.setName(values.getString("name"));
-                    items.add(item);
 
-                }
+            } else { //Si c'est une methode POST
 
-                try {
-                    adapter = new ItemAdapter(HomePage.this, items);
-                    adapter.setCustomButtonListner(HomePage.this);
-                    listFileFolder.setAdapter(adapter);
-                    listFileFolder.setEnabled(true); //Eviter le crash avec le double click
+                /** Affiche le dossier courant apres la creation d'un fichier ou d'un dossier et actualise dle ratio**/
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            } else {
                 params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item?did=" + currentFolderId);
                 params.setMethod("GET");
-
                 HttpAsyncTask refreshView = new HttpAsyncTask();
                 refreshView.delegate = HomePage.this;
                 refreshView.execute(params);
+
+                HttpAsyncTask refreshRatio = new HttpAsyncTask();
+                refreshRatio.delegate = HomePage.this;
+                refreshRatio.execute(ratioParams);
+
                 progressDialog.dismiss(); //Supprime la dialog quand un dossier/fichier est créé
                 floatingMenu.close(true); //Fait disparaitre le foating menu après la création d'un dossier/fichier
             }
 
-            /*
-            float dataUsed = Float.parseFloat(output.get("dataUsed").toString());
-            long maxDataAllowed = Long.parseLong(output.get("maxDataAllowed").toString());
-            dataUsed = dataUsed/1073741824;
-            maxDataAllowed = maxDataAllowed/1073741824;
-            ratio.setText(String.format("%.3f", dataUsed) + "GB / " + String.valueOf(maxDataAllowed)+"GB");
-            */
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getBaseContext(), "Error to contact server. Please try later.", Toast.LENGTH_LONG).show();
@@ -334,6 +374,7 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
+        this.menu = menu;
         return true;
     }
 
@@ -364,8 +405,8 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
     @Override
     public void onButtonClickListner(int position, String id, String name) {   //Override du click lister de la classe ItemAdaptater du bouton details
         Intent intentFolder = new Intent(this, FolderView.class);
-        intentFolder.putExtra("name",name);
-        intentFolder.putExtra("id",id);
+        intentFolder.putExtra("name", name);
+        intentFolder.putExtra("id", id);
         startActivity(intentFolder);
 
     }
