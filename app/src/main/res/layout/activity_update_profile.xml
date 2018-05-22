@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_height="match_parent">
 
     <TextView
         android:id="@+id/textView"
@@ -16,8 +15,6 @@
 
     <EditText
         android:id="@+id/emailText"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="117dp"
         android:layout_width="wrap_content"
         android:layout_height="42dp"
         android:layout_alignParentEnd="true"
@@ -27,12 +24,12 @@
         android:layout_below="@+id/textView"
         android:ems="10"
         android:hint="E-mail"
-        android:inputType="textEmailAddress" />
+        android:inputType="textEmailAddress"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="117dp" />
 
     <EditText
         android:id="@+id/firstnameText"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="159dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -42,12 +39,12 @@
         android:layout_below="@+id/emailText"
         android:ems="10"
         android:hint="Firstname"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="159dp" />
 
     <EditText
-        android:id="@+id/lastNameText"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="205dp"
+        android:id="@+id/lastnameText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -57,12 +54,12 @@
         android:layout_below="@+id/firstnameText"
         android:ems="10"
         android:hint="Lastname"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="205dp" />
 
     <EditText
         android:id="@+id/passwordText"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="251dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -72,7 +69,9 @@
         android:layout_below="@+id/passwordCurrent"
         android:ems="10"
         android:hint="New Password"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="251dp" />
 
     <EditText
         android:id="@+id/passwordCurrent"
@@ -82,17 +81,15 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/lastNameText"
+        android:layout_below="@+id/lastnameText"
         android:ems="10"
-        android:hint="Password Current"
+        android:hint="Current Password"
         android:inputType="textPassword"
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="251dp" />
 
     <EditText
         android:id="@+id/passwordConfText"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="297dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -102,7 +99,9 @@
         android:layout_below="@+id/passwordText"
         android:ems="10"
         android:hint="New Password Confirmation"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="297dp" />
 
     <Button
         android:id="@+id/updateButton"

@@ -91,9 +91,9 @@ public class LoginActivity extends Activity implements AsyncResponse {
         });
 
 
-        }
+    }
 
-    public void login (final Intent intent) {
+    public void login(final Intent intent) {
         Log.d(TAG, "Login");
         if (!validate()) {
             onLoginFailed();
@@ -125,12 +125,9 @@ public class LoginActivity extends Activity implements AsyncResponse {
         params.setJsonObject(jsonObject);
 
 
-        HttpAsyncTask loginTask = new  HttpAsyncTask();
+        HttpAsyncTask loginTask = new HttpAsyncTask();
         loginTask.delegate = this;
         loginTask.execute(params);
-
-
-
 
     }
 
@@ -183,16 +180,16 @@ public class LoginActivity extends Activity implements AsyncResponse {
     }
 
     @Override
-    public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
+    public void processFinish(Map<String, Object> output) { //S'éxécute à chaque fin de requete à l'API
 
         try {
             String message = output.get("message").toString();
 
-            if (message.equals("Login successful.")){
+            if (message.equals("Login successful.")) {
                 String priv_key = output.get("priv_key").toString();
                 String pub_key = output.get("pub_key").toString();
                 String sessionCookie = output.get("sessionCookie").toString();
-                session.createUserLoginSession(loginEditText.getText().toString(),priv_key,pub_key,sessionCookie);
+                session.createUserLoginSession(loginEditText.getText().toString(), priv_key, pub_key, sessionCookie);
                 final Intent intent = new Intent(this, HomePage.class);
 
                 new android.os.Handler().postDelayed(
@@ -203,20 +200,16 @@ public class LoginActivity extends Activity implements AsyncResponse {
                                 progressDialog.dismiss();
                             }
                         }, 3000);
-            }
-            else {
+            } else {
                 onLoginFailed();
                 progressDialog.dismiss();
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getBaseContext(), "Error to contact server. Please try later.", Toast.LENGTH_LONG).show();
             progressDialog.dismiss();
             loginButton.setEnabled(true);
         }
-
-
 
 
     }
