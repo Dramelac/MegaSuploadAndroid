@@ -31,8 +31,8 @@ public class UserSession implements AsyncResponse {
         editor = preferences.edit();
     }
 
-    public void createUserLoginSession(final String name,final String priv_key,final String pub_key,final String sessionCookie){
-        editor.putBoolean(IS_USER_LOGIN,true);
+    public void createUserLoginSession(final String name, final String priv_key, final String pub_key, final String sessionCookie) {
+        editor.putBoolean(IS_USER_LOGIN, true);
         editor.putString(KEY_NAME, name);
         editor.putString(PRIV_KEY, priv_key);
         editor.putString(PUB_KEY, pub_key);
@@ -40,7 +40,7 @@ public class UserSession implements AsyncResponse {
         editor.commit();
     }
 
-    public void logoutUser(){
+    public void logoutUser() {
         preferences = context.getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String sessionCookie = preferences.getString(SESSION_COOKIE, null);
         editor.clear();
@@ -51,7 +51,7 @@ public class UserSession implements AsyncResponse {
         params.setMethod("GET");
         params.setSessionCookie(sessionCookie);
 
-        HttpAsyncTask loginTask = new  HttpAsyncTask();
+        HttpAsyncTask loginTask = new HttpAsyncTask();
         loginTask.delegate = this;
         loginTask.execute(params);
 
@@ -62,15 +62,15 @@ public class UserSession implements AsyncResponse {
         context.startActivity(intent);
     }
 
-    public boolean isLoggedIn(){
+    public boolean isLoggedIn() {
         return preferences.getBoolean(IS_USER_LOGIN, false);
     }
+
     @Override
-    public void processFinish( Map<String, Object> output){
+    public void processFinish(Map<String, Object> output) {
         try {
             String message = output.get("message").toString();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

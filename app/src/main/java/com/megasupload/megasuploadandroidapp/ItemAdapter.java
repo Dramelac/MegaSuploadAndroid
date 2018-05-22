@@ -7,52 +7,78 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.List;
 
 public class ItemAdapter extends ArrayAdapter<Item> {
 
-    //tweets est la liste des models à afficher
+    customButtonListener customListner;
+
+    public interface customButtonListener {
+        public void onButtonClickListner(int position, String id, String name);
+    }
+
+    public void setCustomButtonListner(customButtonListener listener) {
+        this.customListner = listener;
+    }
+
     public ItemAdapter(Context context, List<Item> items) {
         super(context, 0, items);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
 
-        if(convertView == null){
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_item,parent, false);
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.row_item, parent, false);
         }
 
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
-        if(viewHolder == null){
+        if (viewHolder == null) {
             viewHolder = new ViewHolder();
             viewHolder.name = (TextView) convertView.findViewById(R.id.name);
             viewHolder.itemIcon = (ImageView) convertView.findViewById(R.id.itemIcon);
+            viewHolder.detailsButton = (Button) convertView.findViewById(R.id.detailsButton);
             convertView.setTag(viewHolder);
         }
 
-        Item item = getItem(position);
+        final Item item = getItem(position);
 
-        if (item.getDirectory()){
+        if (item.getDirectory()) {
             viewHolder.name.setText(item.getName());
             viewHolder.itemIcon.setImageResource(R.drawable.folder);
-        }
-        else{
+            if (item.getName().equals("..")) {
+                viewHolder.detailsButton.setVisibility(View.GONE);
+            }
+        } else {
             viewHolder.name.setText(item.getName());
             viewHolder.itemIcon.setImageResource(R.drawable.file);
         }
 
+        viewHolder.detailsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String id = item.getId();
+                final String name = item.getName();
+
+                if (customListner != null) {
+                    customListner.onButtonClickListner(position, id, name);
+                }
 
 
+            }
+        });
 
         return convertView;
     }
 
-    private class ViewHolder{
+    private class ViewHolder {
         public TextView name;
         public ImageView itemIcon;
+        public Button detailsButton;
     }
 }

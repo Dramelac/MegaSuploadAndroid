@@ -25,16 +25,16 @@ public class RegisterActivity extends Activity implements AsyncResponse {
     @BindView(R.id.UsernameText)
     EditText UsernameText;
 
-     @BindView(R.id.EmailText)
+    @BindView(R.id.EmailText)
     EditText EmailText;
 
-     @BindView(R.id.FirstnameText)
+    @BindView(R.id.FirstnameText)
     EditText FirstnameText;
 
-     @BindView(R.id.LastNameText)
+    @BindView(R.id.LastNameText)
     EditText LastNameText;
 
-     @BindView(R.id.PasswordText)
+    @BindView(R.id.PasswordText)
     EditText PasswordText;
 
     @BindView(R.id.PasswordConfText)
@@ -51,7 +51,6 @@ public class RegisterActivity extends Activity implements AsyncResponse {
         super.onCreate(savedInstanceState);
         ButterKnife.bind(this);
         session = new UserSession(getApplicationContext());
-        
         final Intent intent = new Intent(this, HomePage.class);
         RegisterButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,9 +60,9 @@ public class RegisterActivity extends Activity implements AsyncResponse {
         });
     }
 
-    public void register (final Intent intent) {
+    public void register(final Intent intent) {
 
-        if(!validate()){
+        if (!validate()) {
             Toast.makeText(getBaseContext(), "Please fill all fields", Toast.LENGTH_LONG).show();
             RegisterButton.setEnabled(true);
             return;
@@ -72,7 +71,6 @@ public class RegisterActivity extends Activity implements AsyncResponse {
 
         final ProgressDialog progressDialog = new ProgressDialog(RegisterActivity.this,
                 R.style.Theme_AppCompat_DayNight_Dialog);
-
 
 
         //Creation de l'objet en fonction des parametres qu'a besoin le requete à l'API
@@ -94,35 +92,35 @@ public class RegisterActivity extends Activity implements AsyncResponse {
         params.setMethod("POST");
         params.setJsonObject(jsonObject);
 
-        HttpAsyncTask loginTask = new  HttpAsyncTask();
+        HttpAsyncTask loginTask = new HttpAsyncTask();
         loginTask.delegate = this;
         loginTask.execute(params);
 
     }
 
-    public boolean validate(){
+    public boolean validate() {
 
         boolean valid = true;
         String username = UsernameText.getText().toString();
-        String email    = EmailText.getText().toString();
-        String pw1      = PasswordText.getText().toString();
-        String pw2      = PasswordConfText.getText().toString();
+        String email = EmailText.getText().toString();
+        String pw1 = PasswordText.getText().toString();
+        String pw2 = PasswordConfText.getText().toString();
 
-        if (username.isEmpty()){
+        if (username.isEmpty()) {
             UsernameText.setError("Username field is empty");
             valid = false;
         }
 
-        if (email.isEmpty()){
+        if (email.isEmpty()) {
             EmailText.setError("Email field is empty");
             valid = false;
         }
 
-        if (pw1.isEmpty()){
+        if (pw1.isEmpty()) {
             PasswordText.setError("Password field is empty");
             valid = false;
         }
-        if (pw2.isEmpty()){
+        if (pw2.isEmpty()) {
             PasswordConfText.setError("Password confirmation field is empty");
             valid = false;
         }
@@ -130,7 +128,7 @@ public class RegisterActivity extends Activity implements AsyncResponse {
     }
 
     @Override
-    public void processFinish( Map<String, Object> output){ //S'éxécute à chaque fin de requete à l'API
+    public void processFinish(Map<String, Object> output) { //S'éxécute à chaque fin de requete à l'API
         try {
 
             String message = output.get("message").toString();
@@ -140,13 +138,13 @@ public class RegisterActivity extends Activity implements AsyncResponse {
             progressDialog.setMessage("Registering...");
             progressDialog.show();
 
-            if (message.equals("Registration successful.")){
-                Toast.makeText(getBaseContext(),message, Toast.LENGTH_LONG).show();
+            if (message.equals("Registration successful.")) {
+                Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
                 String priv_key = output.get("priv_key").toString();
                 String pub_key = output.get("pub_key").toString();
                 String sessionCookie = output.get("sessionCookie").toString();
                 String test = UsernameText.getText().toString();
-                session.createUserLoginSession(UsernameText.getText().toString(),priv_key,pub_key,sessionCookie);
+                session.createUserLoginSession(UsernameText.getText().toString(), priv_key, pub_key, sessionCookie);
                 final Intent intent = new Intent(this, HomePage.class);
 
                 new android.os.Handler().postDelayed(
@@ -157,34 +155,28 @@ public class RegisterActivity extends Activity implements AsyncResponse {
                                 progressDialog.dismiss();
                             }
                         }, 3000);
-            }
-            else {
-                if (message.equals("Passwords are different."))
-                {
+            } else {
+                if (message.equals("Passwords are different.")) {
                     PasswordText.setError(message);
                     PasswordConfText.setError(message);
                 }
 
-                if (message.equals("Password is too short. Should be at least 6 characters long."))
-                {
+                if (message.equals("Password is too short. Should be at least 6 characters long.")) {
                     PasswordText.setError(message);
                 }
 
-                if (message.equals("User already exist."))
-                {
+                if (message.equals("User already exist.")) {
                     UsernameText.setError(message);
                 }
 
-                if (message.equals("Email address is not valid."))
-                {
+                if (message.equals("Email address is not valid.")) {
                     EmailText.setError(message);
                 }
 
                 progressDialog.dismiss();
                 RegisterButton.setEnabled(true);
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(getBaseContext(), "Error to contact server. Please try later.", Toast.LENGTH_LONG).show();
             RegisterButton.setEnabled(true);
