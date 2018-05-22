@@ -11,11 +11,22 @@
         android:id="@+id/include"
         layout="@layout/content_home" />
 
+    <TextView
+        android:id="@+id/noData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        android:text="@string/no_data_on_home_page"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/floatingMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:elevation="10dp"
         android:padding="8dp"
@@ -26,7 +37,8 @@
         fab:menu_colorRipple="#00C29F"
         fab:menu_fab_label="Cancel"
         fab:menu_labels_ellipsize="end"
-        fab:menu_labels_singleLine="true">
+        fab:menu_labels_singleLine="true"
+        tools:targetApi="lollipop">
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/addFile"
