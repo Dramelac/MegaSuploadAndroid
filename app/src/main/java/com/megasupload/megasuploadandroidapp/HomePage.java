@@ -98,13 +98,7 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
         session = new UserSession(getApplicationContext());
         ButterKnife.bind(this);
         setTitle("Home");
-<<<<<<< HEAD
-        final HttpAsyncTask homeTask = new HttpAsyncTask();
-        final Intent intentAddFile = new Intent(this, AddFille.class);
-=======
-
-
->>>>>>> 7927ce63cbe90f64346a6bd43b01f43a6f653bad
+        final Intent intentAddFile = new Intent(this, AddFile.class);
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
 
