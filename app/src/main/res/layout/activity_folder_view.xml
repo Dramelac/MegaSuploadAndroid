@@ -7,12 +7,23 @@
     tools:context=".FolderView">
 
 
+    <ImageView
+        android:id="@+id/folderIcon"
+        android:layout_width="79dp"
+        android:layout_height="75dp"
+        android:layout_above="@+id/rename"
+        android:layout_marginBottom="-93dp"
+        android:layout_toLeftOf="@+id/foldername"
+        android:layout_toStartOf="@+id/foldername"
+        android:background="@drawable/folder" />
+
     <TextView
         android:id="@+id/foldername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="29dp"
         android:text="Register"
         android:textSize="35dp" />
 
@@ -22,18 +33,41 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="93dp"
+        android:layout_marginTop="142dp"
         android:background="@drawable/rounded_button"
         android:text="rename"
+        android:textColor="@color/white" />
+
+
+    <Button
+        android:id="@+id/delete3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="169dp"
+        android:background="@drawable/rounded_button"
+        android:text="delete"
+        android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/delete2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="101dp"
+        android:background="@drawable/rounded_button"
+        android:text="delete"
         android:textColor="@color/white" />
 
     <Button
         android:id="@+id/delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="219dp"
+        android:layout_marginTop="218dp"
         android:background="@drawable/rounded_button"
         android:text="delete"
         android:textColor="@color/white" />
