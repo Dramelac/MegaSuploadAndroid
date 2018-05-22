@@ -339,6 +339,16 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.home:
+                params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item");
+                params.setMethod("GET");
+
+                HttpAsyncTask homeRefresh = new HttpAsyncTask();
+                homeRefresh.delegate = HomePage.this;
+                homeRefresh.execute(params);
+                setTitle("Home");
+                return true;
+
             case R.id.profile:
                 final Intent intentProfil = new Intent(this, UpdateActivity.class);
                 startActivity(intentProfil);

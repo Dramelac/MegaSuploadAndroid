@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/profile"
 
-        android:title="Profile"
+    <item
+        android:id="@+id/home"
 
-        app:showAsAction="always"></item>
+        android:icon="@drawable/ic_action_home"
 
-    <item android:id="@+id/logout"
+        android:title="Home"
 
-        android:title="Logout"
+        app:showAsAction="always" />
 
-        app:showAsAction="always"></item>
+    <group>
+
+        <item
+            android:id="@+id/profile"
+
+            android:title="Profile"
+
+            app:showAsAction="never" />
+
+        <item
+            android:id="@+id/logout"
+
+            android:title="Logout"
+
+            app:showAsAction="never" />
+
+    </group>
+
 
 </menu>
 

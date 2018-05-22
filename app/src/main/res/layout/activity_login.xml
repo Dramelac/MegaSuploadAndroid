@@ -72,6 +72,7 @@
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/LoginTextView"
         android:layout_toStartOf="@+id/LoginTextView"
+        android:background="@drawable/rounded_button"
         android:text="Login" />
 
     <Button
@@ -81,6 +82,7 @@
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@+id/LoginTextView"
         android:layout_toRightOf="@+id/LoginTextView"
+        android:background="@drawable/rounded_button"
         android:text="Register" />
 
 </RelativeLayout>
