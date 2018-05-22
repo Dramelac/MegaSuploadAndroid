@@ -80,9 +80,15 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
 
 
             Header[] headers = httpResponse.getHeaders("Set-Cookie");
+
+
             if (headers.length > 0) {
-                responseSessionCookie = headers[0].getValue();
-                responseSessionCookie = responseSessionCookie.split(";")[0]+";";
+                for (int i = 0;i<headers.length;i++){
+                    if (headers[i].getValue().contains("sessionid")){
+                        responseSessionCookie = headers[i].getValue();
+                        responseSessionCookie = responseSessionCookie.split(";")[0]+";";
+                    }
+                }
             }
 
             inputStream = httpResponse.getEntity().getContent();
