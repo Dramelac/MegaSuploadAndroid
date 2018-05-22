@@ -10,6 +10,10 @@ public class Item {
 
     private String filetype;
 
+    private String image;
+
+    private String path;
+
     public Boolean getDirectory() {
         return directory;
     }
@@ -40,5 +44,13 @@ public class Item {
 
     public void setFiletype(String filetype) {
         this.filetype = filetype;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public String getPath() {
+        return path;
     }
 }
