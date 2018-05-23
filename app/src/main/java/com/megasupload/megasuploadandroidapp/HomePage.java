@@ -137,7 +137,6 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     setTitle(items.get(position).getName());
                     params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item?did=" + items.get(position).getId());
                     homeTask.execute(params);
-
                 }
             }
         });
