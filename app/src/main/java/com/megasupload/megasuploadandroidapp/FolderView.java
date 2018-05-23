@@ -228,7 +228,6 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                                 moveFolder.delegate = FolderView.this;
                                 moveFolder.execute(params);
 
-                                dialog.dismiss();
                             }
                         });
                         confirmDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
