@@ -270,6 +270,25 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
 
     }
 
+    public void gettree(JSONArray Json) throws JSONException {
+
+        for (int i = 1; i <= Json.length(); i++) {
+            JSONObject values = Json.getJSONObject(Json.length() - i);
+            Item childrenItem = new Item();
+            childrenItem.setDirectory(true);
+            childrenItem.setId(values.getString("id"));
+            childrenItem.setName(values.getString("name"));
+            items.add(childrenItem);
+            if(!values.isNull("children")){
+                JSONArray directory = new JSONArray(values.getString("children"));
+                gettree(directory);
+            }
+        }
+
+
+
+    }
+
     @Override
     public void processFinish(Map<String, Object> output) { //S'éxécute à chaque fin de requete à l'API
         try {
@@ -286,8 +305,16 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                 item.setName("Home");
                 items.add(item);
 
-                /*String directoryNameResult = output.get("name").toString();
-                String directoryIdResult = output.get("id").toString();*/
+                String directoryNameResult = output.get("children").toString();
+
+                JSONArray directory = new JSONArray(directoryNameResult);
+
+                gettree(directory);
+
+
+
+
+                /*String directoryIdResult = output.get("id").toString();*/
 
                 System.out.print(output);
                 /*String fileResult = output.get("file").toString();
