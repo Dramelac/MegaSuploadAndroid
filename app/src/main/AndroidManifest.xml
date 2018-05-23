@@ -3,6 +3,9 @@
     package="com.megasupload.megasuploadandroidapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"  />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"   />
+
 
     <application
         android:allowBackup="true"
@@ -33,10 +36,6 @@
             android:name=".AddFile"
             android:label="@string/title_activity_add_file"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".FileList"
-            android:label="@string/title_activity_file_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
