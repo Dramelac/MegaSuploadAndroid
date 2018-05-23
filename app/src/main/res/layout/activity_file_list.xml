@@ -27,12 +27,13 @@
         android:layout_marginLeft="10dip">
 
     </TextView>
-    <TextView android:text="@+id/DateFile"
+
+    <TextView
         android:id="@+id/DateFile"
-        android:layout_width="wrap_content"
+        android:layout_width="45dp"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/NameFile"
         android:layout_alignParentRight="true"
-        android:layout_marginLeft="5dip">
-    </TextView>
+        android:layout_below="@+id/NameFile"
+        android:layout_marginLeft="5dip"
+        android:text="@+id/DateFile"></TextView>
 </RelativeLayout>

@@ -25,11 +25,11 @@
             android:layout_marginTop="15dp"
             android:ems="10"
             android:inputType="textPersonName"
-            android:layout_toLeftOf="@+id/skipButton" >
+            android:layout_toLeftOf="@+id/browseButton" >
         </EditText>
 
         <Button android:text="Browser"
-            android:id="@+id/skipButton"
+            android:id="@+id/browseButton"
             android:textSize="18dp"
             android:layout_marginTop="10dp"
             android:layout_alignParentRight="true"
