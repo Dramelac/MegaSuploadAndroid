@@ -20,6 +20,8 @@ public class Item implements Comparable<Item> {
 
     private String path;
 
+    private int shift;
+
     public Item() {
         this.name = name;
         this.size = size;
@@ -92,6 +94,10 @@ public class Item implements Comparable<Item> {
     public void setImage(String image) {
         this.image = image;
     }
+
+    public int getShift() { return shift; }
+
+    public void setShift(int shift) { this.shift = shift; }
 
     public int compareTo(Item o) {
         if(this.name != null)

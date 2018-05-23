@@ -63,6 +63,8 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
 
     String id;
 
+    String targetDirectoryId;
+
     ProgressDialog progressDialog;
 
     List<Item> items = new ArrayList<Item>();
@@ -176,8 +178,12 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
 
 
                 final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(FolderView.this, android.R.layout.simple_list_item_activated_1);
-                for(Item i : items){
-                    arrayAdapter.add(i.getName());
+                for (Item i : items) {
+                    String itemName = i.getName();
+                    for (int j = 0; j < i.getShift(); j++) {
+                        itemName = " " + itemName;
+                    }
+                    arrayAdapter.add(itemName);
                 }
 
                 alert.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -190,13 +196,38 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                 alert.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        System.out.print(which);
                         String strName = items.get(which).getName();
+                        targetDirectoryId = items.get(which).getId();
                         final AlertDialog.Builder confirmDialog = new AlertDialog.Builder(FolderView.this);
                         confirmDialog.setTitle("Move to " + strName + "?");
                         confirmDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+
+                                JSONObject jsonObject = new JSONObject();
+                                try {
+                                    jsonObject.accumulate("dirId", id);
+                                    jsonObject.accumulate("targetDirId", targetDirectoryId);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+
+                                params.setUrl("https://megasupload.lsd-music.fr/api/file/move_dir");
+                                params.setMethod("POST");
+                                params.setSessionCookie(sessionCookie);
+                                params.setJsonObject(jsonObject);
+
+
+                                progressDialog = new ProgressDialog(FolderView.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                                progressDialog.setIndeterminate(true);
+                                progressDialog.setMessage("Moving...");
+                                progressDialog.show();
+
+                                HttpAsyncTask moveFolder = new HttpAsyncTask();
+                                moveFolder.delegate = FolderView.this;
+                                moveFolder.execute(params);
+
                                 dialog.dismiss();
                             }
                         });
@@ -270,21 +301,28 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
 
     }
 
-    public void gettree(JSONArray Json) throws JSONException {
+    /**
+     * Permet de récupérer les informations de tous les dossiers et sous dossiers de l'application
+     **/
+    public void getTree(JSONArray Json, int shift) throws JSONException {
 
         for (int i = 1; i <= Json.length(); i++) {
             JSONObject values = Json.getJSONObject(Json.length() - i);
-            Item childrenItem = new Item();
-            childrenItem.setDirectory(true);
-            childrenItem.setId(values.getString("id"));
-            childrenItem.setName(values.getString("name"));
-            items.add(childrenItem);
-            if(!values.isNull("children")){
-                JSONArray directory = new JSONArray(values.getString("children"));
-                gettree(directory);
-            }
-        }
+            if (!values.getString("name").equals(name)) {  //Si le nom du dossier est different du dossier de la vue pour éviter de déplacer un dossier dans ses enfants
+                Item childrenItem = new Item();
+                childrenItem.setDirectory(true);
+                childrenItem.setId(values.getString("id"));
+                childrenItem.setName(values.getString("name"));
+                childrenItem.setShift(shift); //Ajoute le décalage (nombre d'espace pour l'affchage) à l'item de la liste
+                items.add(childrenItem);
 
+                if (!values.isNull("children") && !values.getString("children").equals("[]")) { //Si le dossier à un dossier enfant on boucle sur la fonction
+                    JSONArray directory = new JSONArray(values.getString("children"));
+                    getTree(directory, shift + 8); //On ajoute un décalage de 8 espaces pour les dossiers enfants
+                }
+            }
+
+        }
 
 
     }
@@ -294,11 +332,11 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
         try {
             if (params.getMethod().equals("GET")) {
 
-                System.out.print(output);
-                if (items != null && items.size() !=0) {
+                if (items != null && items.size() != 0) {
                     items.clear(); //Supprime la liste des fichiers actuels
                 }
 
+                /** Récupère en premier les informations du dossier parent Home**/
                 Item item = new Item();
                 item.setDirectory(true);
                 item.setId(output.get("id").toString());
@@ -309,29 +347,7 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
 
                 JSONArray directory = new JSONArray(directoryNameResult);
 
-                gettree(directory);
-
-
-
-
-                /*String directoryIdResult = output.get("id").toString();*/
-
-                System.out.print(output);
-                /*String fileResult = output.get("file").toString();
-                fileResult = fileResult.replaceAll("/", ""); //Pour eviter les erreurs lors de la transformation en Json array*/
-
-                /*JSONArray directory = new JSONArray(directoryResult);
-
-                for (int i = 1; i <= directory.length(); i++) {
-
-                    JSONObject values = directory.getJSONObject(directory.length() - i);
-                    Item item = new Item();
-                    item.setDirectory(true);
-                    item.setId(values.getString("id"));
-                    item.setName(values.getString("name"));
-
-                }*/
-
+                getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
 
             } else {
                 progressDialog.dismiss();
