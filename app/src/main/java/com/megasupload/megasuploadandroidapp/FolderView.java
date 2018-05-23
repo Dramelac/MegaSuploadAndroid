@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -18,9 +19,12 @@ import com.megasupload.megasuploadandroidapp.API.AsyncResponse;
 import com.megasupload.megasuploadandroidapp.API.HttpAsyncTask;
 import com.megasupload.megasuploadandroidapp.API.Params;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -34,8 +38,17 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
     @BindView(R.id.foldername)
     TextView folderName;
 
+    @BindView(R.id.download)
+    Button downloadButton;
+
     @BindView(R.id.rename)
     Button renameButton;
+
+    @BindView(R.id.move)
+    Button moveButton;
+
+    @BindView(R.id.publicShare)
+    Button publicShareButton;
 
     @BindView(R.id.delete)
     Button deleteButton;
@@ -51,6 +64,8 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
     String id;
 
     ProgressDialog progressDialog;
+
+    List<Item> items = new ArrayList<Item>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +93,23 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
 
         folderName.setText(name);
         setTitle(name);
+
+        //Initialisation des paramètres nécéssaires pour la requete tree à l'API
+        params.setUrl("https://megasupload.lsd-music.fr/api/file/get_tree");
+        params.setMethod("GET");
+        params.setSessionCookie(sessionCookie);
+
+        HttpAsyncTask treeTask = new HttpAsyncTask();
+        treeTask.delegate = FolderView.this;
+        treeTask.execute(params);
+
+        downloadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
 
         renameButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -135,6 +167,63 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
             }
         });
 
+        moveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final AlertDialog.Builder alert = new AlertDialog.Builder(FolderView.this);
+                alert.setTitle("Select the target directory");
+                alert.setCancelable(false);
+
+
+                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(FolderView.this, android.R.layout.simple_list_item_activated_1);
+                for(Item i : items){
+                    arrayAdapter.add(i.getName());
+                }
+
+                alert.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                alert.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.print(which);
+                        String strName = items.get(which).getName();
+                        final AlertDialog.Builder confirmDialog = new AlertDialog.Builder(FolderView.this);
+                        confirmDialog.setTitle("Move to " + strName + "?");
+                        confirmDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        confirmDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                alert.show();
+                            }
+                        });
+                        confirmDialog.show();
+                    }
+                });
+
+                AlertDialog dialog = alert.create();
+                dialog.show();
+
+
+            }
+        });
+
+        publicShareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -185,6 +274,36 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
     public void processFinish(Map<String, Object> output) { //S'éxécute à chaque fin de requete à l'API
         try {
             if (params.getMethod().equals("GET")) {
+
+                System.out.print(output);
+                if (items != null && items.size() !=0) {
+                    items.clear(); //Supprime la liste des fichiers actuels
+                }
+
+                Item item = new Item();
+                item.setDirectory(true);
+                item.setId(output.get("id").toString());
+                item.setName("Home");
+                items.add(item);
+
+                /*String directoryNameResult = output.get("name").toString();
+                String directoryIdResult = output.get("id").toString();*/
+
+                System.out.print(output);
+                /*String fileResult = output.get("file").toString();
+                fileResult = fileResult.replaceAll("/", ""); //Pour eviter les erreurs lors de la transformation en Json array*/
+
+                /*JSONArray directory = new JSONArray(directoryResult);
+
+                for (int i = 1; i <= directory.length(); i++) {
+
+                    JSONObject values = directory.getJSONObject(directory.length() - i);
+                    Item item = new Item();
+                    item.setDirectory(true);
+                    item.setId(values.getString("id"));
+                    item.setName(values.getString("name"));
+
+                }*/
 
 
             } else {

@@ -7,24 +7,70 @@
     tools:context=".FolderView">
 
 
+    <ImageView
+        android:id="@+id/folderIcon"
+        android:layout_width="79dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_toLeftOf="@+id/foldername"
+
+        android:layout_toStartOf="@+id/foldername"
+        android:background="@drawable/folder" />
+
     <TextView
         android:id="@+id/foldername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:text="Register"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="@dimen/fab_margin"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:text="Title"
         android:textSize="35dp" />
+
+    <Button
+        android:id="@+id/download"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/rename"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:background="@drawable/rounded_button"
+        android:text="Download"
+        android:textColor="@color/white" />
 
     <Button
         android:id="@+id/rename"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="93dp"
+        android:layout_above="@id/move"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
         android:background="@drawable/rounded_button"
-        android:text="rename"
+        android:text="Rename"
+        android:textColor="@color/white" />
+
+
+    <Button
+        android:id="@+id/move"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/publicShare"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:background="@drawable/rounded_button"
+        android:text="Move"
+        android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/publicShare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/delete"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:background="@drawable/rounded_button"
+        android:text="Public Share"
         android:textColor="@color/white" />
 
     <Button
@@ -32,10 +78,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="219dp"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
         android:background="@drawable/rounded_button"
-        android:text="delete"
+        android:text="Delete"
         android:textColor="@color/white" />
 
 

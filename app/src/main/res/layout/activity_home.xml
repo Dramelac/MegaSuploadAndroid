@@ -11,11 +11,22 @@
         android:id="@+id/include"
         layout="@layout/content_home" />
 
+    <TextView
+        android:id="@+id/noData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        android:text="@string/no_data_on_home_page"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
     <com.github.clans.fab.FloatingActionMenu
         android:id="@+id/floatingMenu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:elevation="10dp"
         android:padding="8dp"
@@ -26,12 +37,15 @@
         fab:menu_colorRipple="#00C29F"
         fab:menu_fab_label="Cancel"
         fab:menu_labels_ellipsize="end"
-        fab:menu_labels_singleLine="true">
+        fab:menu_labels_singleLine="true"
+        tools:targetApi="lollipop">
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/addFile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_add_file"
+            app:fab_colorNormal="@color/whiteBlue"
             fab:fab_label="Add File"
             fab:fab_size="mini" />
 
@@ -39,6 +53,8 @@
             android:id="@+id/addFolder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_add_folder"
+            app:fab_colorNormal="@color/whiteBlue"
             fab:fab_label="Add Folder"
             fab:fab_size="mini" />
 
@@ -46,6 +62,8 @@
             android:id="@+id/downloadFolder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_download_file"
+            app:fab_colorNormal="@color/whiteBlue"
             fab:fab_label="Download File"
             fab:fab_size="mini" />
 

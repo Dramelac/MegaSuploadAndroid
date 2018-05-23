@@ -71,6 +71,9 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
     @BindView(R.id.floatingMenu)
     FloatingActionMenu floatingMenu;
 
+    @BindView(R.id.noData)
+    TextView noDataTextView;
+
     private SharedPreferences sharedPreferences;
 
     UserSession session;
@@ -89,7 +92,6 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
     ItemAdapter adapter;
 
     Menu menu;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,7 +137,6 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     setTitle(items.get(position).getName());
                     params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item?did=" + items.get(position).getId());
                     homeTask.execute(params);
-
                 }
             }
         });
@@ -280,7 +281,7 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     String extensions[] = {"B", "kB", "MB", "GB", "TB"};
 
                     double logDataUsed = Math.floor(Math.log(dataUsed) / Math.log(1024));
-                    if (dataUsed != 0){
+                    if (dataUsed != 0) {
                         intLogDataUsed = (int) logDataUsed;
                         stringDataUsed = String.valueOf(decimalFormatDataUsed.format(dataUsed / Math.pow(1024, intLogDataUsed)));
                     }
@@ -337,10 +338,18 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     }
 
                     try {
+
                         adapter = new ItemAdapter(HomePage.this, items);
                         adapter.setCustomButtonListner(HomePage.this);
                         listFileFolder.setAdapter(adapter);
                         listFileFolder.setEnabled(true); //Eviter le crash avec le double click
+
+                        if (items.isEmpty()){
+                            noDataTextView.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            noDataTextView.setVisibility(View.GONE);
+                        }
 
                     } catch (Exception e) {
                         e.printStackTrace();

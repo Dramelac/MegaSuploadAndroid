@@ -29,10 +29,9 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignTop="@+id/itemIcon"
-        android:background="@drawable/rounded_button"
+        android:background="@drawable/ic_action_info"
         android:clickable="true"
         android:focusable="false"
-        android:text="..."
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="20sp" />
