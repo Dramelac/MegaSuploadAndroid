@@ -14,19 +14,19 @@
     <RelativeLayout android:id="@+id/relativeLayout1"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content">
+
         <EditText
-            android:layout_alignParentLeft="true"
-            android:hint="EditText"
-            android:id="@+id/editText"
+            android:id="@+id/addFilesText"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_marginTop="15dp"
+            android:layout_toLeftOf="@+id/browseButton"
             android:ems="10"
-            android:inputType="textPersonName"
-            android:layout_toLeftOf="@+id/browseButton" >
-        </EditText>
+            android:hint="EditText"
+            android:inputType="textPersonName"></EditText>
 
         <Button android:text="Browser"
             android:id="@+id/browseButton"
