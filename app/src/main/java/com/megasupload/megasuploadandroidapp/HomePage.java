@@ -414,11 +414,20 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
     }
 
     @Override
-    public void onButtonClickListner(int position, String id, String name) {   //Override du click lister de la classe ItemAdaptater du bouton details
-        Intent intentFolder = new Intent(this, FolderView.class);
-        intentFolder.putExtra("name", name);
-        intentFolder.putExtra("id", id);
-        startActivity(intentFolder);
+    public void onButtonClickListner(int position, String id, String name,boolean isDirectory) {   //Override du click lister de la classe ItemAdaptater du bouton details
+        if (isDirectory){
+            Intent intentFolder = new Intent(this, FolderView.class);
+            intentFolder.putExtra("name", name);
+            intentFolder.putExtra("id", id);
+            startActivity(intentFolder);
+        }
+        else {
+            Intent intentFolder = new Intent(this, FileView.class);
+            intentFolder.putExtra("name", name);
+            intentFolder.putExtra("id", id);
+            startActivity(intentFolder);
+        }
+
 
     }
 

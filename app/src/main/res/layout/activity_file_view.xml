@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".FileView">
+
+
+    <ImageView
+        android:id="@+id/fileIcon"
+        android:layout_width="79dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_toLeftOf="@+id/filename"
+        android:layout_toStartOf="@+id/filename"
+        android:background="@drawable/file" />
+
+    <TextView
+        android:id="@+id/filename"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="@dimen/fab_margin"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:text="Title"
+        android:textSize="35dp" />
+
+    <Button
+        android:id="@+id/download"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/rename"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:background="@drawable/rounded_button"
+        android:text="Download"
+        android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/rename"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/move"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:background="@drawable/rounded_button"
+        android:text="Rename"
+        android:textColor="@color/white" />
+
+
+    <Button
+        android:id="@+id/move"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/publicShare"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:background="@drawable/rounded_button"
+        android:text="Move"
+        android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/publicShare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/delete"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:background="@drawable/rounded_button"
+        android:text="Public Share"
+        android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:background="@drawable/rounded_button"
+        android:text="Delete"
+        android:textColor="@color/white" />
+
+
+</RelativeLayout>

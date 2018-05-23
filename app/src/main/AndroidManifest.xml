@@ -37,6 +37,7 @@
             android:name=".FileList"
             android:label="@string/title_activity_file_list"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".FileView" />
     </application>
 
 </manifest>
