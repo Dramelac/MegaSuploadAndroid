@@ -109,6 +109,15 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
             @Override
             public void onClick(View v) {
 
+                //Initialisation des paramètres nécéssaires pour la requete tree à l'API
+                params.setUrl("https://megasupload.lsd-music.fr/api/file/download?fid=" + id);
+                params.setMethod("GET");
+                params.setSessionCookie(sessionCookie);
+
+                HttpAsyncTask downlaodTask = new HttpAsyncTask();
+                downlaodTask.delegate = FileView.this;
+                downlaodTask.execute(params);
+
             }
         });
 

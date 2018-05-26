@@ -109,6 +109,15 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
             @Override
             public void onClick(View v) {
 
+                //Initialisation des paramètres nécéssaires pour la requete tree à l'API
+                params.setUrl("https://megasupload.lsd-music.fr/api/file/download_dir?dirId=" + id);
+                params.setMethod("GET");
+                params.setSessionCookie(sessionCookie);
+
+                HttpAsyncTask downlaodTask = new HttpAsyncTask();
+                downlaodTask.delegate = FolderView.this;
+                downlaodTask.execute(params);
+
             }
         });
 
@@ -330,23 +339,30 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
     public void processFinish(Map<String, Object> output) { //S'éxécute à chaque fin de requete à l'API
         try {
             if (params.getMethod().equals("GET")) {
+                if (output.containsKey("children")) {
 
-                if (items != null && items.size() != 0) {
-                    items.clear(); //Supprime la liste des fichiers actuels
+                    if (items != null && items.size() != 0) {
+                        items.clear(); //Supprime la liste des fichiers actuels
+                    }
+
+                    /** Récupère en premier les informations du dossier parent Home**/
+                    Item item = new Item();
+                    item.setDirectory(true);
+                    item.setId(output.get("id").toString());
+                    item.setName("Home");
+                    items.add(item);
+
+                    String directoryNameResult = output.get("children").toString();
+
+                    JSONArray directory = new JSONArray(directoryNameResult);
+
+                    getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
+
+                }
+                else{
+                    System.out.print(output);
                 }
 
-                /** Récupère en premier les informations du dossier parent Home**/
-                Item item = new Item();
-                item.setDirectory(true);
-                item.setId(output.get("id").toString());
-                item.setName("Home");
-                items.add(item);
-
-                String directoryNameResult = output.get("children").toString();
-
-                JSONArray directory = new JSONArray(directoryNameResult);
-
-                getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
 
             } else {
                 progressDialog.dismiss();

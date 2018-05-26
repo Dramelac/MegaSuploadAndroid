@@ -1,6 +1,8 @@
 package com.megasupload.megasuploadandroidapp.API;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import org.apache.http.Header;
@@ -13,6 +15,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,26 +29,26 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >{
+public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object>> {
     public AsyncResponse delegate = null;
+
     @Override
-    protected Map<String, Object>  doInBackground(Params... params) {
-        Map<String, Object>  result = new HashMap<String, Object>();
+    protected Map<String, Object> doInBackground(Params... params) {
+        Map<String, Object> result = new HashMap<String, Object>();
 
-        if(params[0].getMethod().equals("POST")){
-            result = POST(params[0].getUrl(),params[0].getJsonObject(),params[0].getSessionCookie());
+        if (params[0].getMethod().equals("POST")) {
+            result = POST(params[0].getUrl(), params[0].getJsonObject(), params[0].getSessionCookie());
             return result;
-        }
-        else if (params[0].getMethod().equals("GET")){
+        } else if (params[0].getMethod().equals("GET")) {
 
-            return GET(params[0].getUrl(),params[0].getSessionCookie());
-        }
-        else {
-            result.put("message","Error");
+            return GET(params[0].getUrl(), params[0].getSessionCookie());
+        } else {
+            result.put("message", "Error");
             return result;
         }
 
     }
+
     // onPostExecute displays the results of the AsyncTask.
     @Override
     protected void onPostExecute(Map<String, Object> result) {
@@ -52,9 +56,9 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
     }
 
 
-    public static Map<String, Object>  POST(String url, JSONObject jsonObject,String sessionCookie){
+    public static Map<String, Object> POST(String url, JSONObject jsonObject, String sessionCookie) {
         InputStream inputStream = null;
-        Map<String, Object>  result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<String, Object>();
         String responseSessionCookie = "";
 
         try {
@@ -71,10 +75,11 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
 
             httpPost.setEntity(se);
 
+
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json");
-            httpPost.setHeader("X-CSRFToken","076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl");
-            httpPost.setHeader("cookie","csrftoken=076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl;"+sessionCookie);
+            httpPost.setHeader("X-CSRFToken", "076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl");
+            httpPost.setHeader("cookie", "csrftoken=076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl;" + sessionCookie);
 
             HttpResponse httpResponse = httpclient.execute(httpPost);
 
@@ -83,23 +88,23 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
 
 
             if (headers.length > 0) {
-                for (int i = 0;i<headers.length;i++){
-                    if (headers[i].getValue().contains("sessionid")){
+                for (int i = 0; i < headers.length; i++) {
+                    if (headers[i].getValue().contains("sessionid")) {
                         responseSessionCookie = headers[i].getValue();
-                        responseSessionCookie = responseSessionCookie.split(";")[0]+";";
+                        responseSessionCookie = responseSessionCookie.split(";")[0] + ";";
                     }
                 }
             }
 
             inputStream = httpResponse.getEntity().getContent();
 
-            if(inputStream != null)
+            if (inputStream != null)
                 result = convertInputStreamToString(inputStream);
 
             else
-                result.put("message","Error");
+                result.put("message", "Error");
 
-            result.put("sessionCookie",responseSessionCookie);
+            result.put("sessionCookie", responseSessionCookie);
 
         } catch (Exception e) {
             Log.d("InputStream", e.getLocalizedMessage());
@@ -109,9 +114,9 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
         return result;
     }
 
-    public static Map<String, Object>  GET(String url,String sessionCookie){
+    public static Map<String, Object> GET(String url, String sessionCookie) {
         InputStream inputStream = null;
-        Map<String, Object>  result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<String, Object>();
         try {
 
             // 1. create HttpClient
@@ -122,10 +127,18 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
 
 
             // 7. Set some headers to inform server about the type of the content
-            httpGet.setHeader("Accept", "application/json");
-            httpGet.setHeader("Content-type", "application/json");
-            httpGet.setHeader("X-CSRFToken","076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl");
-            httpGet.setHeader("cookie","csrftoken=076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl;"+sessionCookie);
+
+            if (url.contains("download")) {
+                httpGet.setHeader("Accept", "application/png");
+                httpGet.setHeader("Content-type", "application/png");
+
+            } else {
+                httpGet.setHeader("Accept", "application/json");
+                httpGet.setHeader("Content-type", "application/json");
+
+            }
+            httpGet.setHeader("X-CSRFToken", "076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl");
+            httpGet.setHeader("cookie", "csrftoken=076FDUYTDasKPX6Z6YAIQefiq2a9jD3WJqwHHZOnjEJ0OkV340HnWkJ1stITwWQl;" + sessionCookie);
 
             // 8. Execute POST request to the given URL
             HttpResponse httpResponse = httpclient.execute(httpGet);
@@ -134,12 +147,25 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
             // 9. receive response as inputStream
             inputStream = httpResponse.getEntity().getContent();
 
-            // 10. convert inputstream to string
-            if(inputStream != null)
-                result = convertInputStreamToString(inputStream);
 
+            // 10. convert inputstream to string
+            if (inputStream != null)
+                if (url.contains("download")) {
+                    FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory(), "logo.png"));
+
+                    int read = 0;
+                    byte[] buffer = new byte[32768];
+                    while( (read = inputStream.read(buffer)) > 0) {
+                        fos.write(buffer, 0, read);
+                    }
+
+                    fos.close();
+                    inputStream.close();
+                } else {
+                    result = convertInputStreamToString(inputStream);
+                }
             else
-                result.put("message","Error");
+                result.put("message", "Error");
 
         } catch (Exception e) {
             Log.d("InputStream", e.getLocalizedMessage());
@@ -149,19 +175,19 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >
         return result;
     }
 
-    private static Map<String, Object>  convertInputStreamToString(InputStream inputStream) throws IOException {
+    private static Map<String, Object> convertInputStreamToString(InputStream inputStream) throws IOException {
 
-        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line = "";
         Map<String, Object> result = new HashMap<String, Object>();
 
-        while((line = bufferedReader.readLine()) != null){
+        while ((line = bufferedReader.readLine()) != null) {
             System.out.print(line);
 
             result = new ObjectMapper().readValue(line, HashMap.class);
         }
-        if (result.size()==0){
-            result.put("message","No data");
+        if (result.size() == 0) {
+            result.put("message", "No data");
         }
 
         inputStream.close();
