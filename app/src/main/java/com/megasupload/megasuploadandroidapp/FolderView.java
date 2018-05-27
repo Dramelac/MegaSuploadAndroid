@@ -365,8 +365,8 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                     getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
 
                 }
-                else{
-                    progressDialog.dismiss(); //Correspond à la fin d'un download
+                else{  //Correspond à la fin d'un download
+                    progressDialog.dismiss();
 
                     AlertDialog.Builder alert = new AlertDialog.Builder(FolderView.this);
                     LayoutInflater inflater = getLayoutInflater();

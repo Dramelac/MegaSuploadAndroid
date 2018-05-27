@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -256,7 +257,18 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
             @Override
             public void onClick(View v) {
-                setTitle("testactionlist");
+                //Initialisation des paramètres nécéssaires pour la requete tree à l'API
+                params.setUrl("https://megasupload.lsd-music.fr/api/file/download_dir?dirId=" + currentFolderId);
+                params.setMethod("GET");
+
+                HttpAsyncTask downlaodTask = new HttpAsyncTask();
+                downlaodTask.delegate = HomePage.this;
+                downlaodTask.execute(params);
+
+                progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setMessage("Downloading...");
+                progressDialog.show();
             }
         });
 
@@ -356,6 +368,27 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     }
 
                 }
+                if(output.size() == 0 ){  //Correspond à la fin d'une requete de download
+                    progressDialog.dismiss();
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
+                    LayoutInflater inflater = getLayoutInflater();
+                    View alertLayout = inflater.inflate(R.layout.info_dialog, null);
+                    alert.setView(alertLayout);
+                    final TextView info = alertLayout.findViewById(R.id.info);
+                    alert.setTitle("Folder download succeeded.");
+                    alert.setCancelable(false);
+                    info.setText("Your folder is located in " + Environment.getExternalStorageDirectory() + "/" + "MegaSupload");
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    AlertDialog dialog = alert.create();
+                    dialog.show();
+                }
+
 
 
             } else { //Si c'est une methode POST
