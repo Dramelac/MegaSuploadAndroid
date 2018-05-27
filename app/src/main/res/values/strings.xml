@@ -2,4 +2,8 @@
     <string name="app_name">MegaSuploadAndroidApp</string>
     <string name="title_activity_update">UpdateActivity</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_add_fille">AddFille</string>
+    <string name="title_activity_add_file">AddFile</string>
+    <string name="title_activity_file_list">FileList</string>
+    <string name="no_data_on_home_page">No data, please add files or folders </string>
 </resources>

@@ -4,10 +4,9 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Environment;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -32,12 +31,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.megasupload.megasuploadandroidapp.UserSession.PREFER_NAME;
+import static com.megasupload.megasuploadandroidapp.UserSession.PRIV_KEY;
+import static com.megasupload.megasuploadandroidapp.UserSession.PUB_KEY;
 import static com.megasupload.megasuploadandroidapp.UserSession.SESSION_COOKIE;
 
-public class FolderView extends AppCompatActivity implements AsyncResponse {
+public class FileView extends AppCompatActivity implements AsyncResponse {
 
-    @BindView(R.id.foldername)
-    TextView folderName;
+    @BindView(R.id.filename)
+    TextView fileName;
 
     @BindView(R.id.download)
     Button downloadButton;
@@ -73,11 +74,13 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_folder_view);
+        setContentView(R.layout.activity_file_view);
         ButterKnife.bind(this);
         session = new UserSession(getApplicationContext());
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         final String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
+        final String privateKey = sharedPreferences.getString(PRIV_KEY,null);
+        final String publicKey = sharedPreferences.getString(PUB_KEY,null);
 
 
         if (savedInstanceState == null) {
@@ -94,7 +97,7 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
             id = (String) savedInstanceState.getSerializable("name");
         }
 
-        folderName.setText(name);
+        fileName.setText(name);
         setTitle(name);
 
         //Initialisation des paramètres nécéssaires pour la requete tree à l'API
@@ -103,7 +106,7 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
         params.setSessionCookie(sessionCookie);
 
         HttpAsyncTask treeTask = new HttpAsyncTask();
-        treeTask.delegate = FolderView.this;
+        treeTask.delegate = FileView.this;
         treeTask.execute(params);
 
         downloadButton.setOnClickListener(new View.OnClickListener() {
@@ -111,18 +114,19 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
             public void onClick(View v) {
 
                 //Initialisation des paramètres nécéssaires pour la requete tree à l'API
-                params.setUrl("https://megasupload.lsd-music.fr/api/file/download_dir?dirId=" + id);
+                params.setUrl("https://megasupload.lsd-music.fr/api/file/download?fid=" + id + "&k="+publicKey);
                 params.setMethod("GET");
                 params.setSessionCookie(sessionCookie);
 
                 HttpAsyncTask downlaodTask = new HttpAsyncTask();
-                downlaodTask.delegate = FolderView.this;
+                downlaodTask.delegate = FileView.this;
                 downlaodTask.execute(params);
 
-                progressDialog = new ProgressDialog(FolderView.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                progressDialog = new ProgressDialog(FileView.this, R.style.Theme_AppCompat_DayNight_Dialog);
                 progressDialog.setIndeterminate(true);
                 progressDialog.setMessage("Downloading...");
                 progressDialog.show();
+
 
             }
         });
@@ -132,8 +136,8 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
             @Override
             public void onClick(View v) {
 
-                AlertDialog.Builder alert = new AlertDialog.Builder(FolderView.this);
-                alert.setTitle("Rename Folder");
+                AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);
+                alert.setTitle("Rename File");
                 LayoutInflater inflater = getLayoutInflater();
                 View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
                 alert.setView(alertLayout);
@@ -156,19 +160,19 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                         }
 
                         //Initialisation des paramètres nécéssaires pour la requete à l'API
-                        params.setUrl("https://megasupload.lsd-music.fr/api/file/rename_dir");
+                        params.setUrl("https://megasupload.lsd-music.fr/api/file/rename_file");
                         params.setMethod("POST");
                         params.setSessionCookie(sessionCookie);
                         params.setJsonObject(jsonObject);
 
 
-                        progressDialog = new ProgressDialog(FolderView.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                        progressDialog = new ProgressDialog(FileView.this, R.style.Theme_AppCompat_DayNight_Dialog);
                         progressDialog.setIndeterminate(true);
                         progressDialog.setMessage("Renaming...");
                         progressDialog.show();
 
                         HttpAsyncTask createFolder = new HttpAsyncTask();
-                        createFolder.delegate = FolderView.this;
+                        createFolder.delegate = FileView.this;
                         createFolder.execute(params);
 
                     }
@@ -187,12 +191,12 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
         moveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final AlertDialog.Builder alert = new AlertDialog.Builder(FolderView.this);
+                final AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);
                 alert.setTitle("Select the target directory");
                 alert.setCancelable(false);
 
 
-                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(FolderView.this, android.R.layout.simple_list_item_activated_1);
+                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(FileView.this, android.R.layout.simple_list_item_activated_1);
                 for (Item i : items) {
                     String itemName = i.getName();
                     for (int j = 0; j < i.getShift(); j++) {
@@ -213,7 +217,7 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                     public void onClick(DialogInterface dialog, int which) {
                         String strName = items.get(which).getName();
                         targetDirectoryId = items.get(which).getId();
-                        final AlertDialog.Builder confirmDialog = new AlertDialog.Builder(FolderView.this);
+                        final AlertDialog.Builder confirmDialog = new AlertDialog.Builder(FileView.this);
                         confirmDialog.setTitle("Move to " + strName + "?");
                         confirmDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
@@ -221,26 +225,26 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
 
                                 JSONObject jsonObject = new JSONObject();
                                 try {
-                                    jsonObject.accumulate("dirId", id);
+                                    jsonObject.accumulate("fileId", id);
                                     jsonObject.accumulate("targetDirId", targetDirectoryId);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
 
 
-                                params.setUrl("https://megasupload.lsd-music.fr/api/file/move_dir");
+                                params.setUrl("https://megasupload.lsd-music.fr/api/file/move_file");
                                 params.setMethod("POST");
                                 params.setSessionCookie(sessionCookie);
                                 params.setJsonObject(jsonObject);
 
 
-                                progressDialog = new ProgressDialog(FolderView.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                                progressDialog = new ProgressDialog(FileView.this, R.style.Theme_AppCompat_DayNight_Dialog);
                                 progressDialog.setIndeterminate(true);
                                 progressDialog.setMessage("Moving...");
                                 progressDialog.show();
 
                                 HttpAsyncTask moveFolder = new HttpAsyncTask();
-                                moveFolder.delegate = FolderView.this;
+                                moveFolder.delegate = FileView.this;
                                 moveFolder.execute(params);
 
                             }
@@ -273,8 +277,8 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
             @Override
             public void onClick(View v) {
 
-                AlertDialog.Builder alert = new AlertDialog.Builder(FolderView.this);
-                alert.setTitle("Do you really want to delete this folder?");
+                AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);
+                alert.setTitle("Do you really want to delete this file?");
                 alert.setCancelable(false);
                 alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 
@@ -286,19 +290,19 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        params.setUrl("https://megasupload.lsd-music.fr/api/file/remove_dir?id=" + id);
+                        params.setUrl("https://megasupload.lsd-music.fr/api/file/remove_file?id=" + id);
                         params.setMethod("POST");
                         params.setSessionCookie(sessionCookie);
                         params.setJsonObject(jsonObject);
 
-                        progressDialog = new ProgressDialog(FolderView.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                        progressDialog = new ProgressDialog(FileView.this, R.style.Theme_AppCompat_DayNight_Dialog);
                         progressDialog.setIndeterminate(true);
                         progressDialog.setMessage("Deleting...");
                         progressDialog.show();
 
-                        HttpAsyncTask removeFolder = new HttpAsyncTask();
-                        removeFolder.delegate = FolderView.this;
-                        removeFolder.execute(params);
+                        HttpAsyncTask removeFile = new HttpAsyncTask();
+                        removeFile.delegate = FileView.this;
+                        removeFile.execute(params);
                     }
                 });
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -322,19 +326,19 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
 
         for (int i = 1; i <= Json.length(); i++) {
             JSONObject values = Json.getJSONObject(Json.length() - i);
-            if (!values.getString("name").equals(name)) {  //Si le nom du dossier est different du dossier de la vue pour éviter de déplacer un dossier dans ses enfants
-                Item childrenItem = new Item();
-                childrenItem.setDirectory(true);
-                childrenItem.setId(values.getString("id"));
-                childrenItem.setName(values.getString("name"));
-                childrenItem.setShift(shift); //Ajoute le décalage (nombre d'espace pour l'affchage) à l'item de la liste
-                items.add(childrenItem);
+            //Si le nom du dossier est different du dossier de la vue pour éviter de déplacer un dossier dans ses enfants
+            Item childrenItem = new Item();
+            childrenItem.setDirectory(true);
+            childrenItem.setId(values.getString("id"));
+            childrenItem.setName(values.getString("name"));
+            childrenItem.setShift(shift); //Ajoute le décalage (nombre d'espace pour l'affchage) à l'item de la liste
+            items.add(childrenItem);
 
-                if (!values.isNull("children") && !values.getString("children").equals("[]")) { //Si le dossier à un dossier enfant on boucle sur la fonction
-                    JSONArray directory = new JSONArray(values.getString("children"));
-                    getTree(directory, shift + 8); //On ajoute un décalage de 8 espaces pour les dossiers enfants
-                }
+            if (!values.isNull("children") && !values.getString("children").equals("[]")) { //Si le dossier à un dossier enfant on boucle sur la fonction
+                JSONArray directory = new JSONArray(values.getString("children"));
+                getTree(directory, shift + 8); //On ajoute un décalage de 8 espaces pour les dossiers enfants
             }
+
 
         }
 
@@ -346,14 +350,13 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
         try {
             if (params.getMethod().equals("GET")) {
                 if (output.containsKey("children")) {
-
                     if (items != null && items.size() != 0) {
                         items.clear(); //Supprime la liste des fichiers actuels
                     }
 
                     /** Récupère en premier les informations du dossier parent Home**/
                     Item item = new Item();
-                    item.setDirectory(true);
+                    item.setDirectory(false);
                     item.setId(output.get("id").toString());
                     item.setName("Home");
                     items.add(item);
@@ -363,35 +366,15 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                     JSONArray directory = new JSONArray(directoryNameResult);
 
                     getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
-
                 }
-                else{  //Correspond à la fin d'un download
-                    progressDialog.dismiss();
-
-                    AlertDialog.Builder alert = new AlertDialog.Builder(FolderView.this);
-                    LayoutInflater inflater = getLayoutInflater();
-                    View alertLayout = inflater.inflate(R.layout.info_dialog, null);
-                    alert.setView(alertLayout);
-                    final TextView info = alertLayout.findViewById(R.id.info);
-                    alert.setTitle("Folder download succeeded.");
-                    alert.setCancelable(false);
-                    info.setText("Your folder is located in " + Environment.getExternalStorageDirectory() + "/" + "MegaSupload");
-                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    });
-                    AlertDialog dialog = alert.create();
-                    dialog.show();
+                else {
+                    progressDialog.dismiss(); //Correspond à la fin d'un download
                 }
 
-
-            } else {  //Correspond à la fin d'une requete POST
+            } else { //Correspond à la fin d'une requete POST
                 progressDialog.dismiss();
                 final Intent intent = new Intent(this, HomePage.class);
                 startActivity(intent);
-
             }
 
         } catch (Exception e) {
