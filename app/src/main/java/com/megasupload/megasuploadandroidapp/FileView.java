@@ -31,6 +31,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.megasupload.megasuploadandroidapp.UserSession.PREFER_NAME;
+import static com.megasupload.megasuploadandroidapp.UserSession.PRIV_KEY;
+import static com.megasupload.megasuploadandroidapp.UserSession.PUB_KEY;
 import static com.megasupload.megasuploadandroidapp.UserSession.SESSION_COOKIE;
 
 public class FileView extends AppCompatActivity implements AsyncResponse {
@@ -77,6 +79,8 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
         session = new UserSession(getApplicationContext());
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         final String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
+        final String privateKey = sharedPreferences.getString(PRIV_KEY,null);
+        final String publicKey = sharedPreferences.getString(PUB_KEY,null);
 
 
         if (savedInstanceState == null) {
@@ -110,13 +114,19 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
             public void onClick(View v) {
 
                 //Initialisation des paramètres nécéssaires pour la requete tree à l'API
-                params.setUrl("https://megasupload.lsd-music.fr/api/file/download?fid=" + id);
+                params.setUrl("https://megasupload.lsd-music.fr/api/file/download?fid=" + id + "&k="+publicKey);
                 params.setMethod("GET");
                 params.setSessionCookie(sessionCookie);
 
                 HttpAsyncTask downlaodTask = new HttpAsyncTask();
                 downlaodTask.delegate = FileView.this;
                 downlaodTask.execute(params);
+
+                progressDialog = new ProgressDialog(FileView.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setMessage("Downloading...");
+                progressDialog.show();
+
 
             }
         });
@@ -315,8 +325,8 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
     public void getTree(JSONArray Json, int shift) throws JSONException {
 
         for (int i = 1; i <= Json.length(); i++) {
-        JSONObject values = Json.getJSONObject(Json.length() - i);
-         //Si le nom du dossier est different du dossier de la vue pour éviter de déplacer un dossier dans ses enfants
+            JSONObject values = Json.getJSONObject(Json.length() - i);
+            //Si le nom du dossier est different du dossier de la vue pour éviter de déplacer un dossier dans ses enfants
             Item childrenItem = new Item();
             childrenItem.setDirectory(true);
             childrenItem.setId(values.getString("id"));
@@ -339,29 +349,32 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
     public void processFinish(Map<String, Object> output) { //S'éxécute à chaque fin de requete à l'API
         try {
             if (params.getMethod().equals("GET")) {
+                if (output.containsKey("children")) {
+                    if (items != null && items.size() != 0) {
+                        items.clear(); //Supprime la liste des fichiers actuels
+                    }
 
-                if (items != null && items.size() != 0) {
-                    items.clear(); //Supprime la liste des fichiers actuels
+                    /** Récupère en premier les informations du dossier parent Home**/
+                    Item item = new Item();
+                    item.setDirectory(false);
+                    item.setId(output.get("id").toString());
+                    item.setName("Home");
+                    items.add(item);
+
+                    String directoryNameResult = output.get("children").toString();
+
+                    JSONArray directory = new JSONArray(directoryNameResult);
+
+                    getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
+                }
+                else {
+                    progressDialog.dismiss(); //Correspond à la fin d'un download
                 }
 
-                /** Récupère en premier les informations du dossier parent Home**/
-                Item item = new Item();
-                item.setDirectory(false);
-                item.setId(output.get("id").toString());
-                item.setName("Home");
-                items.add(item);
-
-                String directoryNameResult = output.get("children").toString();
-
-                JSONArray directory = new JSONArray(directoryNameResult);
-
-                getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
-
-            } else {
+            } else { //Correspond à la fin d'une requete POST
                 progressDialog.dismiss();
                 final Intent intent = new Intent(this, HomePage.class);
                 startActivity(intent);
-
             }
 
         } catch (Exception e) {

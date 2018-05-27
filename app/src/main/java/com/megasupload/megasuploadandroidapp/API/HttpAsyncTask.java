@@ -129,8 +129,8 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object>> 
             // 7. Set some headers to inform server about the type of the content
 
             if (url.contains("download")) {
-                httpGet.setHeader("Accept", "application/png");
-                httpGet.setHeader("Content-type", "application/png");
+                httpGet.setHeader("Accept", "application/zip");
+                httpGet.setHeader("Content-type", "application/zip");
 
             } else {
                 httpGet.setHeader("Accept", "application/json");
@@ -151,16 +151,12 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object>> 
             // 10. convert inputstream to string
             if (inputStream != null)
                 if (url.contains("download")) {
-                    FileOutputStream fos = new FileOutputStream(new File(Environment.getExternalStorageDirectory(), "logo.png"));
 
-                    int read = 0;
-                    byte[] buffer = new byte[32768];
-                    while( (read = inputStream.read(buffer)) > 0) {
-                        fos.write(buffer, 0, read);
-                    }
+                    Header[] headers = httpResponse.getHeaders("Content-Disposition");
+                    String[] header = headers[0].getValue().split("'");
+                    String filename = header[header.length - 1];
+                    convertInputStreamToFile(inputStream, filename);
 
-                    fos.close();
-                    inputStream.close();
                 } else {
                     result = convertInputStreamToString(inputStream);
                 }
@@ -192,6 +188,26 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object>> 
 
         inputStream.close();
         return result;
+
+    }
+
+    private static void convertInputStreamToFile(InputStream inputStream, String filename) throws IOException {
+
+        File appFile = new File(Environment.getExternalStorageDirectory(), "MegaSupload");
+        if (!appFile.exists()) {
+            appFile.mkdir();
+        }
+        FileOutputStream fileOutputStream = new FileOutputStream(new File(Environment.getExternalStorageDirectory() + "/" + "MegaSupload", filename));
+
+        int read = 0;
+        byte[] buffer = new byte[32768];
+        while ((read = inputStream.read(buffer)) > 0) {
+            fileOutputStream.write(buffer, 0, read);
+        }
+
+        fileOutputStream.close();
+        inputStream.close();
+
 
     }
 }
