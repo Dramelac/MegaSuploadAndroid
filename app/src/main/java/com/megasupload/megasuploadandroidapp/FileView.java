@@ -1,6 +1,7 @@
 package com.megasupload.megasuploadandroidapp;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -80,8 +81,8 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
         session = new UserSession(getApplicationContext());
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         final String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
-        final String privateKey = sharedPreferences.getString(PRIV_KEY,null);
-        final String publicKey = sharedPreferences.getString(PUB_KEY,null);
+        final String privateKey = sharedPreferences.getString(PRIV_KEY, null);
+        final String publicKey = sharedPreferences.getString(PUB_KEY, null);
 
 
         if (savedInstanceState == null) {
@@ -268,6 +269,13 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
         publicShareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                params.setUrl("https://megasupload.lsd-music.fr/api/share/public?id=" + id + "&type=file");
+                params.setMethod("GET");
+                params.setSessionCookie(sessionCookie);
+
+                HttpAsyncTask publicShareTask = new HttpAsyncTask();
+                publicShareTask.delegate = FileView.this;
+                publicShareTask.execute(params);
 
             }
         });
@@ -365,8 +373,40 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                     JSONArray directory = new JSONArray(directoryNameResult);
 
                     getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
-                }
-                else { //Correspond à la fin d'un download
+
+                } else if (output.containsKey("permId")) { //Correspond à la fin d'un public Share
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);
+                    alert.setTitle("Public Share");
+                    LayoutInflater inflater = getLayoutInflater();
+                    View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
+                    alert.setView(alertLayout);
+                    final EditText newName = alertLayout.findViewById(R.id.newname);
+                    final TextView nameinfo = alertLayout.findViewById(R.id.nameInfo);
+                    alert.setCancelable(false);
+                    nameinfo.setText("URL : ");
+                    newName.setText("https://megasupload.lsd-music.fr/api/file/public_download?id=" + id + "&type=file&permId=" + output.get("permId").toString());
+                    alert.setPositiveButton("Copy", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            String dirName = newName.getText().toString();
+                            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                            android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", dirName);
+                            clipboard.setPrimaryClip(clip);
+
+                        }
+                    });
+                    alert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    AlertDialog dialog = alert.create();
+                    dialog.show();
+
+                } else { //Correspond à la fin d'un download
                     progressDialog.dismiss();
 
                     AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);

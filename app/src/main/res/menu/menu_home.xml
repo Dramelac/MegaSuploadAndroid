@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-
     <item
-        android:id="@+id/ratio"
+        android:id="@+id/shared"
 
-        android:title="Ratio"
+        android:icon="@drawable/ic_action_share"
+
+        android:title="Shared"
 
         app:showAsAction="ifRoom" />
+
 
     <item
         android:id="@+id/home"
@@ -16,6 +17,13 @@
         android:icon="@drawable/ic_action_home"
 
         android:title="Home"
+
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/ratio"
+
+        android:title="Ratio"
 
         app:showAsAction="ifRoom" />
 

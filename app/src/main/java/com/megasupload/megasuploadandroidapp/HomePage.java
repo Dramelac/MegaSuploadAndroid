@@ -424,6 +424,16 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.shared:
+                params.setUrl("https://megasupload.lsd-music.fr/api/share/ls");
+                params.setMethod("GET");
+
+                HttpAsyncTask sharedItems = new HttpAsyncTask();
+                sharedItems.delegate = HomePage.this;
+                sharedItems.execute(params);
+                setTitle("Shared Items");
+                return true;
+
             case R.id.home:
                 params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item");
                 params.setMethod("GET");
