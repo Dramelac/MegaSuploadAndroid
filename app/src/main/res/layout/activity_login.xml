@@ -55,15 +55,6 @@
         android:hint="Password"
         android:inputType="textPassword" />
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/passwordEditText"
-        android:text="Attempts Left:"
-        android:textSize="25dp" />
 
     <Button
         android:id="@+id/loginButton"
@@ -73,7 +64,8 @@
         android:layout_toLeftOf="@+id/LoginTextView"
         android:layout_toStartOf="@+id/LoginTextView"
         android:background="@drawable/rounded_button"
-        android:text="Login" />
+        android:text="Login"
+        android:textColor="@color/white" />
 
     <Button
         android:id="@+id/register"
@@ -83,6 +75,7 @@
         android:layout_toEndOf="@+id/LoginTextView"
         android:layout_toRightOf="@+id/LoginTextView"
         android:background="@drawable/rounded_button"
-        android:text="Register" />
+        android:text="Register"
+        android:textColor="@color/white" />
 
 </RelativeLayout>
