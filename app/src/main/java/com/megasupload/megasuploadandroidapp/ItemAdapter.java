@@ -19,7 +19,7 @@ public class ItemAdapter extends ArrayAdapter<Item> {
     customButtonListener customListner;
 
     public interface customButtonListener {
-        public void onButtonClickListner(int position, String id, String name);
+        public void onButtonClickListner(int position, String id, String name,boolean isDirectory);
     }
 
     public void setCustomButtonListner(customButtonListener listener) {
@@ -64,9 +64,10 @@ public class ItemAdapter extends ArrayAdapter<Item> {
             public void onClick(View v) {
                 final String id = item.getId();
                 final String name = item.getName();
+                final boolean isDirectory = item.getDirectory();
 
                 if (customListner != null) {
-                    customListner.onButtonClickListner(position, id, name);
+                    customListner.onButtonClickListner(position, id, name, isDirectory);
                 }
 
 

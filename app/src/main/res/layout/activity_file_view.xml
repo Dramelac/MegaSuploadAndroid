@@ -4,21 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FolderView">
+    tools:context=".FileView">
 
 
     <ImageView
-        android:id="@+id/folderIcon"
+        android:id="@+id/fileIcon"
         android:layout_width="79dp"
         android:layout_height="75dp"
         android:layout_marginTop="@dimen/fab_margin"
-        android:layout_toLeftOf="@+id/foldername"
-
-        android:layout_toStartOf="@+id/foldername"
-        android:background="@drawable/folder" />
+        android:layout_toLeftOf="@+id/filename"
+        android:layout_toStartOf="@+id/filename"
+        android:background="@drawable/file" />
 
     <TextView
-        android:id="@+id/foldername"
+        android:id="@+id/filename"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"

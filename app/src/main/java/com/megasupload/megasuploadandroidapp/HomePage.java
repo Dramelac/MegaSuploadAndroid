@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -71,6 +72,9 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
     @BindView(R.id.floatingMenu)
     FloatingActionMenu floatingMenu;
 
+    @BindView(R.id.noData)
+    TextView noDataTextView;
+
     private SharedPreferences sharedPreferences;
 
     UserSession session;
@@ -90,7 +94,6 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
     Menu menu;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,8 +101,7 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
         session = new UserSession(getApplicationContext());
         ButterKnife.bind(this);
         setTitle("Home");
-
-
+        final Intent intentAddFile = new Intent(this, AddFile.class);
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
 
@@ -136,7 +138,6 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     setTitle(items.get(position).getName());
                     params.setUrl("https://megasupload.lsd-music.fr/api/file/list_item?did=" + items.get(position).getId());
                     homeTask.execute(params);
-
                 }
             }
         });
@@ -145,54 +146,55 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
         addFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
-                alert.setTitle("New File");
-                LayoutInflater inflater = getLayoutInflater();
-                View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
-                alert.setView(alertLayout);
-                final EditText newName = alertLayout.findViewById(R.id.newname);
-                alert.setCancelable(false);
-                alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        String dirName = newName.getText().toString();
-
-
-                        JSONObject jsonObject = new JSONObject();
-                        try {
-                            jsonObject.accumulate("dirId", currentFolderId);
-                            jsonObject.accumulate("name", dirName);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        //Initialisation des paramètres nécéssaires pour la requete à l'API
-                        params.setUrl("https://megasupload.lsd-music.fr/api/file/add_dir");
-                        params.setMethod("POST");
-                        params.setJsonObject(jsonObject);
-
-
-                        progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
-                        progressDialog.setIndeterminate(true);
-                        progressDialog.setMessage("Creating...");
-                        progressDialog.show();
-
-                        HttpAsyncTask createFolder = new HttpAsyncTask();
-                        createFolder.delegate = HomePage.this;
-                        createFolder.execute(params);
-
-
-                    }
-                });
-                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-                AlertDialog dialog = alert.create();
-                dialog.show();
+                startActivity(intentAddFile);
+//                AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
+//                alert.setTitle("New File");
+//                LayoutInflater inflater = getLayoutInflater();
+//                View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
+//                alert.setView(alertLayout);
+//                final EditText newName = alertLayout.findViewById(R.id.newname);
+//                alert.setCancelable(false);
+//                alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+//
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//
+//                        String dirName = newName.getText().toString();
+//
+//
+//                        JSONObject jsonObject = new JSONObject();
+//                        try {
+//                            jsonObject.accumulate("dirId", currentFolderId);
+//                            jsonObject.accumulate("name", dirName);
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//
+//                        //Initialisation des paramètres nécéssaires pour la requete à l'API
+//                        params.setUrl("https://megasupload.lsd-music.fr/api/file/add_dir");
+//                        params.setMethod("POST");
+//                        params.setJsonObject(jsonObject);
+//
+//
+//                        progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
+//                        progressDialog.setIndeterminate(true);
+//                        progressDialog.setMessage("Creating...");
+//                        progressDialog.show();
+//
+//                        HttpAsyncTask createFolder = new HttpAsyncTask();
+//                        createFolder.delegate = HomePage.this;
+//                        createFolder.execute(params);
+//
+//
+//                    }
+//                });
+//                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                    }
+//                });
+//                AlertDialog dialog = alert.create();
+//                dialog.show();
             }
         });
 
@@ -255,7 +257,18 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
             @Override
             public void onClick(View v) {
-                setTitle("testactionlist");
+                //Initialisation des paramètres nécéssaires pour la requete tree à l'API
+                params.setUrl("https://megasupload.lsd-music.fr/api/file/download_dir?dirId=" + currentFolderId);
+                params.setMethod("GET");
+
+                HttpAsyncTask downlaodTask = new HttpAsyncTask();
+                downlaodTask.delegate = HomePage.this;
+                downlaodTask.execute(params);
+
+                progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                progressDialog.setIndeterminate(true);
+                progressDialog.setMessage("Downloading...");
+                progressDialog.show();
             }
         });
 
@@ -269,25 +282,27 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
                 if (output.containsKey("dataUsed")) {
 
+                    int intLogDataUsed = 0;
+                    String stringDataUsed = String.valueOf(0);
+                    DecimalFormat decimalFormatDataUsed = new DecimalFormat("0.##");
+                    DecimalFormat decimalFormatDataAllowed = new DecimalFormat("0");
+
                     double dataUsed = Double.parseDouble(output.get("dataUsed").toString());
                     double dataAllowed = Double.parseDouble(output.get("maxDataAllowed").toString());
 
                     String extensions[] = {"B", "kB", "MB", "GB", "TB"};
 
                     double logDataUsed = Math.floor(Math.log(dataUsed) / Math.log(1024));
-                    int intLogDataUsed = (int) logDataUsed;
+                    if (dataUsed != 0) {
+                        intLogDataUsed = (int) logDataUsed;
+                        stringDataUsed = String.valueOf(decimalFormatDataUsed.format(dataUsed / Math.pow(1024, intLogDataUsed)));
+                    }
 
                     double logDataAllowed = Math.floor(Math.log(dataAllowed) / Math.log(1024));
                     int intLogDataAllowed = (int) logDataAllowed;
-
-
-                    DecimalFormat decimalFormatDataUsed = new DecimalFormat("0.##");
-                    DecimalFormat decimalFormatDataAllowed = new DecimalFormat("0");
+                    String stringDataAllowed = String.valueOf(decimalFormatDataAllowed.format(dataAllowed / Math.pow(1024, intLogDataAllowed)));
 
                     MenuItem ratioTitle = menu.findItem(R.id.ratio);
-
-                    String stringDataUsed = String.valueOf(decimalFormatDataUsed.format(dataUsed / Math.pow(1024, intLogDataUsed)));
-                    String stringDataAllowed = String.valueOf(decimalFormatDataAllowed.format(dataAllowed / Math.pow(1024, intLogDataAllowed)));
 
                     ratioTitle.setTitle(stringDataUsed + " " + extensions[intLogDataUsed] + " / " + stringDataAllowed + " " + extensions[intLogDataAllowed]);
 
@@ -335,16 +350,45 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     }
 
                     try {
+
                         adapter = new ItemAdapter(HomePage.this, items);
                         adapter.setCustomButtonListner(HomePage.this);
                         listFileFolder.setAdapter(adapter);
                         listFileFolder.setEnabled(true); //Eviter le crash avec le double click
+
+                        if (items.isEmpty()){
+                            noDataTextView.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            noDataTextView.setVisibility(View.GONE);
+                        }
 
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
                 }
+                if(output.size() == 0 ){  //Correspond à la fin d'une requete de download
+                    progressDialog.dismiss();
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
+                    LayoutInflater inflater = getLayoutInflater();
+                    View alertLayout = inflater.inflate(R.layout.info_dialog, null);
+                    alert.setView(alertLayout);
+                    final TextView info = alertLayout.findViewById(R.id.info);
+                    alert.setTitle("Folder download succeeded.");
+                    alert.setCancelable(false);
+                    info.setText("Your folder is located in " + Environment.getExternalStorageDirectory() + "/" + "MegaSupload");
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    AlertDialog dialog = alert.create();
+                    dialog.show();
+                }
+
 
 
             } else { //Si c'est une methode POST
@@ -403,11 +447,20 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
     }
 
     @Override
-    public void onButtonClickListner(int position, String id, String name) {   //Override du click lister de la classe ItemAdaptater du bouton details
-        Intent intentFolder = new Intent(this, FolderView.class);
-        intentFolder.putExtra("name", name);
-        intentFolder.putExtra("id", id);
-        startActivity(intentFolder);
+    public void onButtonClickListner(int position, String id, String name,boolean isDirectory) {   //Override du click lister de la classe ItemAdaptater du bouton details
+        if (isDirectory){
+            Intent intentFolder = new Intent(this, FolderView.class);
+            intentFolder.putExtra("name", name);
+            intentFolder.putExtra("id", id);
+            startActivity(intentFolder);
+        }
+        else {
+            Intent intentFolder = new Intent(this, FileView.class);
+            intentFolder.putExtra("name", name);
+            intentFolder.putExtra("id", id);
+            startActivity(intentFolder);
+        }
+
 
     }
 
