@@ -13,8 +13,10 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="24dp"
         android:background="@drawable/rounded_button"
+        android:layout_marginEnd="@dimen/fab_margin"
         android:text="Register"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"
+        android:layout_marginRight="@dimen/fab_margin" />
 
     <TextView
         android:id="@+id/TextView"
