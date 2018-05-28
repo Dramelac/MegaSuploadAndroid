@@ -381,17 +381,17 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                     LayoutInflater inflater = getLayoutInflater();
                     View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
                     alert.setView(alertLayout);
-                    final EditText newName = alertLayout.findViewById(R.id.newname);
+                    final EditText urlText = alertLayout.findViewById(R.id.newname);
                     final TextView nameinfo = alertLayout.findViewById(R.id.nameInfo);
                     alert.setCancelable(false);
                     nameinfo.setText("URL : ");
-                    newName.setText("https://megasupload.lsd-music.fr/api/file/public_download?id=" + id + "&type=file&permId=" + output.get("permId").toString());
+                    urlText.setText("https://megasupload.lsd-music.fr/api/file/public_download?id=" + id + "&type=file&permId=" + output.get("permId").toString());
                     alert.setPositiveButton("Copy", new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
-                            String dirName = newName.getText().toString();
+                            String dirName = urlText.getText().toString();
                             android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
                             android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", dirName);
                             clipboard.setPrimaryClip(clip);
