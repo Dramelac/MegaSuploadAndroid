@@ -7,12 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
-<<<<<<< HEAD
 import android.os.CountDownTimer;
 import android.os.Handler;
-=======
 import android.os.Environment;
->>>>>>> 78d0a023d5e76f21e9beda6f33d3cd89aabb9b74
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;

@@ -29,11 +29,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-<<<<<<< HEAD
 public class   HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >{
-=======
-public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object>> {
->>>>>>> 78d0a023d5e76f21e9beda6f33d3cd89aabb9b74
     public AsyncResponse delegate = null;
 
     @Override
