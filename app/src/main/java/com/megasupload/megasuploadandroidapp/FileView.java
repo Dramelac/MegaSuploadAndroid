@@ -54,6 +54,9 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
     @BindView(R.id.publicShare)
     Button publicShareButton;
 
+    @BindView(R.id.privateShare)
+    Button privateShareButton;
+
     @BindView(R.id.delete)
     Button deleteButton;
 
@@ -276,6 +279,43 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                 HttpAsyncTask publicShareTask = new HttpAsyncTask();
                 publicShareTask.delegate = FileView.this;
                 publicShareTask.execute(params);
+
+            }
+        });
+
+         privateShareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);
+                alert.setTitle("Public Share");
+                LayoutInflater inflater = getLayoutInflater();
+                View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
+                alert.setView(alertLayout);
+                final EditText urlText = alertLayout.findViewById(R.id.newname);
+                final TextView nameinfo = alertLayout.findViewById(R.id.nameInfo);
+                alert.setCancelable(false);
+                alert.setPositiveButton("Copy", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String dirName = urlText.getText().toString();
+                        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", dirName);
+                        clipboard.setPrimaryClip(clip);
+
+                    }
+                });
+                alert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                AlertDialog dialog = alert.create();
+                dialog.show();
+
+
 
             }
         });

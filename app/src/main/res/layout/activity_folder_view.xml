@@ -9,13 +9,13 @@
 
     <ImageView
         android:id="@+id/folderIcon"
-        android:layout_width="79dp"
+        android:layout_width="75dp"
         android:layout_height="75dp"
+        android:layout_marginLeft="@dimen/fab_margin"
         android:layout_marginTop="@dimen/fab_margin"
         android:layout_toLeftOf="@+id/foldername"
-
         android:layout_toStartOf="@+id/foldername"
-        android:background="@drawable/folder" />
+        android:background="@drawable/ic_folder" />
 
     <TextView
         android:id="@+id/foldername"
@@ -36,6 +36,7 @@
         android:layout_centerInParent="true"
         android:layout_marginBottom="@dimen/fab_margin"
         android:background="@drawable/rounded_button"
+        android:drawableLeft="@drawable/ic_action_download_folder"
         android:text="Download"
         android:textColor="@color/white" />
 
@@ -47,6 +48,7 @@
         android:layout_centerInParent="true"
         android:layout_marginBottom="@dimen/fab_margin"
         android:background="@drawable/rounded_button"
+        android:drawableLeft="@drawable/ic_action_rename"
         android:text="Rename"
         android:textColor="@color/white" />
 
@@ -59,6 +61,7 @@
         android:layout_centerInParent="true"
         android:layout_marginBottom="@dimen/fab_margin"
         android:background="@drawable/rounded_button"
+        android:drawableLeft="@drawable/ic_action_move"
         android:text="Move"
         android:textColor="@color/white" />
 
@@ -66,11 +69,24 @@
         android:id="@+id/publicShare"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@id/privateShare"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:background="@drawable/rounded_button"
+        android:drawableLeft="@drawable/ic_action_share"
+        android:text="Public Share"
+        android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/privateShare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_above="@id/delete"
         android:layout_centerInParent="true"
         android:layout_marginBottom="@dimen/fab_margin"
         android:background="@drawable/rounded_button"
-        android:text="Public Share"
+        android:drawableLeft="@drawable/ic_action_share"
+        android:text="Private Share"
         android:textColor="@color/white" />
 
     <Button
@@ -80,7 +96,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
         android:layout_marginBottom="@dimen/fab_margin"
-        android:background="@drawable/rounded_button"
+        android:background="@drawable/rounded_button_delete"
+        android:drawableLeft="@drawable/ic_action_delete"
         android:text="Delete"
         android:textColor="@color/white" />
 
