@@ -138,11 +138,10 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 
 
-                listFileFolder.setEnabled(false); //Eviter le crash avec le double click
-
                 Item selectedItem = items.get(position);
 
                 if (selectedItem.getDirectory()) {
+                    listFileFolder.setEnabled(false); //Eviter le crash avec le double click
                     HttpAsyncTask homeTask = new HttpAsyncTask();
                     homeTask.delegate = HomePage.this;
                     setTitle(items.get(position).getName());

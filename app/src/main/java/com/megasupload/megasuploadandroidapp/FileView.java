@@ -76,6 +76,8 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
 
     List<Item> items = new ArrayList<Item>();
 
+    List<String> usersResult = new ArrayList<String>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,6 +147,7 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                 View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
                 alert.setView(alertLayout);
                 final EditText newName = alertLayout.findViewById(R.id.newname);
+                newName.setText(name);
                 alert.setCancelable(false);
                 alert.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
 
@@ -288,26 +291,27 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
             public void onClick(View v) {
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);
-                alert.setTitle("Public Share");
+                alert.setTitle("Private Share");
                 LayoutInflater inflater = getLayoutInflater();
-                View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
+                View alertLayout = inflater.inflate(R.layout.private_share_dialog, null);
                 alert.setView(alertLayout);
-                final EditText urlText = alertLayout.findViewById(R.id.newname);
-                final TextView nameinfo = alertLayout.findViewById(R.id.nameInfo);
+                final EditText user = alertLayout.findViewById(R.id.user);
+                final TextView userInfo = alertLayout.findViewById(R.id.userinfo);
                 alert.setCancelable(false);
-                alert.setPositiveButton("Copy", new DialogInterface.OnClickListener() {
+                alert.setPositiveButton("Share", new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        String dirName = urlText.getText().toString();
-                        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", dirName);
-                        clipboard.setPrimaryClip(clip);
+                        String userSearch = user.getText().toString();
+                        params.setUrl("https://megasupload.lsd-music.fr/api/user/search?query=" + userSearch);
+                        params.setMethod("GET");
+                        params.setSessionCookie(sessionCookie);
+
 
                     }
                 });
-                alert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                     }
@@ -446,7 +450,12 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                     AlertDialog dialog = alert.create();
                     dialog.show();
 
-                } else { //Correspond à la fin d'un download
+                }else if(output.containsKey("result")){
+
+
+
+                }
+                else { //Correspond à la fin d'un download
                     progressDialog.dismiss();
 
                     AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);
