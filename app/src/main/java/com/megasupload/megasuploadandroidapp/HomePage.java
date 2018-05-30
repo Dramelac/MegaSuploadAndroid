@@ -7,6 +7,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -93,6 +95,14 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
     Menu menu;
 
+
+    String file_name_string;
+
+    public boolean actResult = false;
+
+
+    private static final int READ_REQUEST_CODE = 42;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,55 +155,66 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
         addFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(intentAddFile);
-//                AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
-//                alert.setTitle("New File");
-//                LayoutInflater inflater = getLayoutInflater();
-//                View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
-//                alert.setView(alertLayout);
-//                final EditText newName = alertLayout.findViewById(R.id.newname);
-//                alert.setCancelable(false);
-//                alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-//
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//
-//                        String dirName = newName.getText().toString();
-//
-//
-//                        JSONObject jsonObject = new JSONObject();
-//                        try {
-//                            jsonObject.accumulate("dirId", currentFolderId);
-//                            jsonObject.accumulate("name", dirName);
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                        //Initialisation des paramètres nécéssaires pour la requete à l'API
-//                        params.setUrl("https://megasupload.lsd-music.fr/api/file/add_dir");
-//                        params.setMethod("POST");
-//                        params.setJsonObject(jsonObject);
-//
-//
-//                        progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
-//                        progressDialog.setIndeterminate(true);
-//                        progressDialog.setMessage("Creating...");
-//                        progressDialog.show();
-//
-//                        HttpAsyncTask createFolder = new HttpAsyncTask();
-//                        createFolder.delegate = HomePage.this;
-//                        createFolder.execute(params);
-//
-//
-//                    }
-//                });
-//                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                    }
-//                });
-//                AlertDialog dialog = alert.create();
-//                dialog.show();
+                AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
+                alert.setTitle("New File");
+                LayoutInflater inflater = getLayoutInflater();
+                final View alertLayout = inflater.inflate(R.layout.creation_file_dialog, null);
+                alert.setView(alertLayout);
+                final EditText name = alertLayout.findViewById(R.id.fileName);
+                name.setText(file_name_string);
+                final Button buttonBrowse = alertLayout.findViewById(R.id.BrowseFile);
+                alert.setCancelable(false);
+                alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog,int which){
+                        String dirName = name.getText().toString();
+
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.accumulate("dirId", currentFolderId);
+                            jsonObject.accumulate("key", "");
+                            jsonObject.accumulate("file", file_name_string);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        //Initialisation des paramètres nécéssaires pour la requete à l'API
+                        params.setUrl("https://megasupload.lsd-music.fr/api/file/upload");
+                        params.setMethod("POST");
+                        params.setJsonObject(jsonObject);
+
+
+                        progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                        progressDialog.setIndeterminate(true);
+                        progressDialog.setMessage("Creating...");
+                        progressDialog.show();
+
+                        HttpAsyncTask uploadfile = new HttpAsyncTask();
+                        uploadfile.delegate = HomePage.this;
+                        uploadfile.execute(params);
+
+                        }
+                });
+
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                final AlertDialog dialog = alert.create();
+                dialog.show();
+                buttonBrowse.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.cancel();
+                        }
+                        performFileSearch();
+
+                    }
+                });
             }
         });
 
@@ -262,6 +283,90 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
 
     }
+
+
+
+
+    public void performFileSearch() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+        startActivityForResult(intent, READ_REQUEST_CODE);
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            // The document selected by the user won't be returned in the intent.
+            // Instead, a URI to that document will be contained in the return intent
+            // provided to this method as a parameter.
+            // Pull that URI using resultData.getData().
+            if (resultData != null) {
+                file_name_string =  resultData.getData().toString();
+                AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
+                alert.setTitle("New File");
+                LayoutInflater inflater = getLayoutInflater();
+                View alertLayout = inflater.inflate(R.layout.creation_file_dialog, null);
+                alert.setView(alertLayout);
+                final EditText name = alertLayout.findViewById(R.id.fileName);
+                name.setText(file_name_string);
+                final Button buttonBrowse = alertLayout.findViewById(R.id.BrowseFile);
+                alert.setCancelable(false);
+                alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog,int which){
+
+                        JSONObject jsonObject = new JSONObject();
+                        try {
+                            jsonObject.accumulate("dirId", currentFolderId);
+                            jsonObject.accumulate("key", "");
+                            jsonObject.accumulate("file", file_name_string);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        //Initialisation des paramètres nécéssaires pour la requete à l'API
+                        params.setUrl("https://megasupload.lsd-music.fr/api/file/upload");
+                        params.setMethod("POST");
+                        params.setJsonObject(jsonObject);
+
+
+                        progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                        progressDialog.setIndeterminate(true);
+                        progressDialog.setMessage("Creating...");
+                        progressDialog.show();
+
+                        HttpAsyncTask uploadfile = new HttpAsyncTask();
+                        uploadfile.delegate = HomePage.this;
+                        uploadfile.execute(params);
+
+                    }
+                });
+
+                buttonBrowse.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        performFileSearch();
+
+                        progressDialog.dismiss();
+                    }
+                });
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog = alert.create();
+                dialog.show();
+
+            }
+        }
+    }
+
+
+
 
     @Override
     public void processFinish(Map<String, Object> output) { //S'éxécute à chaque fin de requete à l'API

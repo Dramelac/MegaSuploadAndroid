@@ -25,7 +25,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >{
+public class   HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object> >{
     public AsyncResponse delegate = null;
     @Override
     protected Map<String, Object>  doInBackground(Params... params) {
