@@ -45,13 +45,12 @@ public class LoginActivity extends Activity implements AsyncResponse {
     @BindView(R.id.register)
     Button registerButton;
 
-    int counter = 3;
 
     UserSession session;
 
     ProgressDialog progressDialog;
 
-    private SharedPreferences sharedPreferences;
+    SharedPreferences sharedPreferences;
 
     static private boolean login_correct = false;
 
