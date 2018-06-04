@@ -266,6 +266,14 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
             @Override
             public void onClick(View v) {
 
+                params.setUrl("https://megasupload.lsd-music.fr/api/share/public?id=" + id + "&type=dir");
+                params.setMethod("GET");
+                params.setSessionCookie(sessionCookie);
+
+                HttpAsyncTask publicShareTask = new HttpAsyncTask();
+                publicShareTask.delegate = FolderView.this;
+                publicShareTask.execute(params);
+
             }
         });
 
@@ -363,6 +371,38 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                     JSONArray directory = new JSONArray(directoryNameResult);
 
                     getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
+
+                }else if (output.containsKey("permId")) { //Correspond à la fin d'un public Share
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(FolderView.this);
+                    alert.setTitle("Public Share");
+                    LayoutInflater inflater = getLayoutInflater();
+                    View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
+                    alert.setView(alertLayout);
+                    final EditText urlText = alertLayout.findViewById(R.id.newname);
+                    final TextView nameinfo = alertLayout.findViewById(R.id.nameInfo);
+                    alert.setCancelable(false);
+                    nameinfo.setText("URL : ");
+                    urlText.setText("https://megasupload.lsd-music.fr/api/file/public_download?id=" + id + "&type=dir&permId=" + output.get("permId").toString());
+                    alert.setPositiveButton("Copy", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            String dirName = urlText.getText().toString();
+                            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getApplicationContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                            android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", dirName);
+                            clipboard.setPrimaryClip(clip);
+
+                        }
+                    });
+                    alert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    AlertDialog dialog = alert.create();
+                    dialog.show();
 
                 }
                 else{  //Correspond à la fin d'un download

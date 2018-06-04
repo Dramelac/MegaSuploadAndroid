@@ -1,17 +1,23 @@
 package com.megasupload.megasuploadandroidapp;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +58,9 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
     @BindView(R.id.publicShare)
     Button publicShareButton;
 
+    @BindView(R.id.privateShare)
+    Button privateShareButton;
+
     @BindView(R.id.delete)
     Button deleteButton;
 
@@ -71,6 +80,12 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
 
     List<Item> items = new ArrayList<Item>();
 
+    List<Item> usersResult = new ArrayList<Item>();
+
+    AlertDialog.Builder userSearchDialog;
+
+    ArrayAdapter<String> arrayAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,9 +94,8 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
         session = new UserSession(getApplicationContext());
         sharedPreferences = getApplicationContext().getSharedPreferences(PREFER_NAME, MODE_PRIVATE);
         final String sessionCookie = sharedPreferences.getString(SESSION_COOKIE, null);
-        final String privateKey = sharedPreferences.getString(PRIV_KEY,null);
-        final String publicKey = sharedPreferences.getString(PUB_KEY,null);
-
+        final String privateKey = sharedPreferences.getString(PRIV_KEY, null);
+        final String publicKey = sharedPreferences.getString(PUB_KEY, null);
 
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
@@ -114,7 +128,7 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
             public void onClick(View v) {
 
                 //Initialisation des paramètres nécéssaires pour la requete tree à l'API
-                params.setUrl("https://megasupload.lsd-music.fr/api/file/download?fid=" + id + "&k="+publicKey);
+                params.setUrl("https://megasupload.lsd-music.fr/api/file/download?fid=" + id);
                 params.setMethod("GET");
                 params.setSessionCookie(sessionCookie);
 
@@ -126,8 +140,6 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                 progressDialog.setIndeterminate(true);
                 progressDialog.setMessage("Downloading...");
                 progressDialog.show();
-
-
             }
         });
 
@@ -142,6 +154,7 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                 View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
                 alert.setView(alertLayout);
                 final EditText newName = alertLayout.findViewById(R.id.newname);
+                newName.setText(name);
                 alert.setCancelable(false);
                 alert.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
 
@@ -231,7 +244,6 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                                     e.printStackTrace();
                                 }
 
-
                                 params.setUrl("https://megasupload.lsd-music.fr/api/file/move_file");
                                 params.setMethod("POST");
                                 params.setSessionCookie(sessionCookie);
@@ -269,6 +281,130 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
         publicShareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                params.setUrl("https://megasupload.lsd-music.fr/api/share/public?id=" + id + "&type=file");
+                params.setMethod("GET");
+                params.setSessionCookie(sessionCookie);
+
+                HttpAsyncTask publicShareTask = new HttpAsyncTask();
+                publicShareTask.delegate = FileView.this;
+                publicShareTask.execute(params);
+
+            }
+        });
+
+        privateShareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                userSearchDialog = new AlertDialog.Builder(FileView.this);
+                userSearchDialog.setTitle("Private Share");
+                LayoutInflater inflater = getLayoutInflater();
+                View alertLayout = inflater.inflate(R.layout.private_share_dialog, null);
+                userSearchDialog.setView(alertLayout);
+                final EditText user = alertLayout.findViewById(R.id.user);
+                final Button searchButton = alertLayout.findViewById(R.id.search);
+                final ListView userResultList = alertLayout.findViewById(R.id.searchResult);
+                userSearchDialog.setCancelable(false);
+                arrayAdapter = new ArrayAdapter<String>(FileView.this, android.R.layout.simple_list_item_activated_1);
+                for (Item i : usersResult) {
+                    arrayAdapter.add(i.getName());
+                }
+
+                userResultList.setAdapter(arrayAdapter);
+
+                userResultList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int position, final long itemid) {
+
+                        String userName = usersResult.get(position).getName();
+                        final String userID = usersResult.get(position).getId();
+
+                        final AlertDialog.Builder confirmDialog = new AlertDialog.Builder(FileView.this);
+                        confirmDialog.setTitle("Wich permissions?");
+                        LayoutInflater inflater = getLayoutInflater();
+                        View alertLayout = inflater.inflate(R.layout.permissions_checkbox_dialog, null);
+                        confirmDialog.setView(alertLayout);
+                        final CheckBox writeCheckBox = alertLayout.findViewById(R.id.writeCheckBox);
+                        final CheckBox shareCheckBox = alertLayout.findViewById(R.id.shareCheckBox);
+
+
+                        confirmDialog.setPositiveButton("Share", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                int writePermission = 0;
+                                int sharePermission = 0;
+                                if(writeCheckBox.isChecked())
+                                {
+                                    writePermission = 1;
+                                }
+                                if (shareCheckBox.isChecked()){
+                                    sharePermission = 1;
+                                }
+                                JSONObject jsonObject = new JSONObject();
+                                try {
+                                    jsonObject.accumulate("elementId", id);
+                                    jsonObject.accumulate("targetUserId", userID);
+                                    jsonObject.accumulate("encryptedKey", privateKey);
+                                    jsonObject.accumulate("read", "1");
+                                    jsonObject.accumulate("write", writePermission);
+                                    jsonObject.accumulate("share", sharePermission);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                                params.setUrl("https://megasupload.lsd-music.fr/api/share/share");
+                                params.setMethod("POST");
+                                params.setSessionCookie(sessionCookie);
+                                params.setJsonObject(jsonObject);
+
+                                progressDialog = new ProgressDialog(FileView.this, R.style.Theme_AppCompat_DayNight_Dialog);
+                                progressDialog.setIndeterminate(true);
+                                progressDialog.setMessage("Sharing...");
+                                progressDialog.show();
+
+                                HttpAsyncTask ShareTask = new HttpAsyncTask();
+                                ShareTask.delegate = FileView.this;
+                                ShareTask.execute(params);
+                            }
+                        });
+                        confirmDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                        confirmDialog.show();
+
+                    }
+                });
+
+                userSearchDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (usersResult != null && usersResult.size() != 0) {
+                            usersResult.clear();
+                        }
+                    }
+                });
+
+                searchButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String userSearch = user.getText().toString();
+                        params.setUrl("https://megasupload.lsd-music.fr/api/user/search?query=" + userSearch);
+                        params.setMethod("GET");
+                        params.setSessionCookie(sessionCookie);
+
+                        HttpAsyncTask searchUser = new HttpAsyncTask();
+                        searchUser.delegate = FileView.this;
+                        searchUser.execute(params);
+
+                    }
+                });
+
+                AlertDialog dialog = userSearchDialog.create();
+                dialog.show();
+
 
             }
         });
@@ -308,6 +444,7 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                 alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
                     }
                 });
                 AlertDialog dialog = alert.create();
@@ -366,9 +503,86 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                     JSONArray directory = new JSONArray(directoryNameResult);
 
                     getTree(directory, 4); //Shift correspond au décalage (nombre d'espace lors de l'affichage.
-                }
-                else {
-                    progressDialog.dismiss(); //Correspond à la fin d'un download
+
+                } else if (output.containsKey("permId")) { //Correspond à la fin d'un public Share
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);
+                    alert.setTitle("Public Share");
+                    LayoutInflater inflater = getLayoutInflater();
+                    View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
+                    alert.setView(alertLayout);
+                    final EditText urlText = alertLayout.findViewById(R.id.newname);
+                    final TextView nameinfo = alertLayout.findViewById(R.id.nameInfo);
+                    alert.setCancelable(false);
+                    nameinfo.setText("URL : ");
+                    urlText.setText("https://megasupload.lsd-music.fr/api/file/public_download?id=" + id + "&type=file&permId=" + output.get("permId").toString());
+                    alert.setPositiveButton("Copy", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            String dirName = urlText.getText().toString();
+                            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                            android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", dirName);
+                            clipboard.setPrimaryClip(clip);
+
+                        }
+                    });
+                    alert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    AlertDialog dialog = alert.create();
+                    dialog.show();
+
+                } else if (output.containsKey("results")) {  //Correspond à la fin d'un private Share
+                    String searchUserResults = output.get("results").toString();
+
+                    if (usersResult != null && usersResult.size() != 0) {
+                        usersResult.clear();
+                    }
+                    if (arrayAdapter != null) {
+                        arrayAdapter.clear();
+                    }
+                    JSONArray searchUser = new JSONArray(searchUserResults);
+
+                    for (int i = 0; i < searchUser.length(); i++) {
+                        JSONObject values = searchUser.getJSONObject(i);
+                        Item item = new Item();
+                        item.setId(values.getString("id"));
+                        item.setName(values.getString("username"));
+                        usersResult.add(item);
+                    }
+                    for (Item i : usersResult) {
+                        arrayAdapter.add(i.getName());
+                    }
+
+                    arrayAdapter.notifyDataSetChanged();
+                    if (arrayAdapter.isEmpty()){
+                        Toast.makeText(getBaseContext(), "No user founded", Toast.LENGTH_LONG).show();
+                    }
+
+
+                } else { //Correspond à la fin d'un download
+                    progressDialog.dismiss();
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(FileView.this);
+                    LayoutInflater inflater = getLayoutInflater();
+                    View alertLayout = inflater.inflate(R.layout.info_dialog, null);
+                    alert.setView(alertLayout);
+                    final TextView info = alertLayout.findViewById(R.id.info);
+                    alert.setTitle("File download succeeded.");
+                    alert.setCancelable(false);
+                    info.setText("Your file is located in " + Environment.getExternalStorageDirectory() + "/" + "MegaSupload");
+                    alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    AlertDialog dialog = alert.create();
+                    dialog.show();
                 }
 
             } else { //Correspond à la fin d'une requete POST

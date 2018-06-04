@@ -5,7 +5,7 @@
     android:shape="rectangle">
 
     <corners android:radius="20dp" />
-    <solid android:color="@color/meagaSupload" />
+    <solid android:color="@color/red" />
 
     <padding
         android:bottom="5dp"
