@@ -69,25 +69,14 @@
         android:id="@+id/publicShare"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/privateShare"
+        android:layout_above="@id/delete"
         android:layout_centerInParent="true"
         android:layout_marginBottom="@dimen/fab_margin"
         android:background="@drawable/rounded_button"
         android:drawableLeft="@drawable/ic_action_share"
         android:text="Public Share"
         android:textColor="@color/white" />
-
-    <Button
-        android:id="@+id/privateShare"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/delete"
-        android:layout_centerInParent="true"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:background="@drawable/rounded_button"
-        android:drawableLeft="@drawable/ic_action_share"
-        android:text="Private Share"
-        android:textColor="@color/white" />
+    
 
     <Button
         android:id="@+id/delete"

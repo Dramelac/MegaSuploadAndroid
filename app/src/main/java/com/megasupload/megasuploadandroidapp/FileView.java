@@ -345,7 +345,8 @@ public class FileView extends AppCompatActivity implements AsyncResponse {
                                 try {
                                     jsonObject.accumulate("elementId", id);
                                     jsonObject.accumulate("targetUserId", userID);
-                                    jsonObject.accumulate("read", 1);
+                                    jsonObject.accumulate("encryptedKey", privateKey);
+                                    jsonObject.accumulate("read", "1");
                                     jsonObject.accumulate("write", writePermission);
                                     jsonObject.accumulate("share", sharePermission);
                                 } catch (JSONException e) {
