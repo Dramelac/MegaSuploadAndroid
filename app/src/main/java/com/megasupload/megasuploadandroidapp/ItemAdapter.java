@@ -50,7 +50,7 @@ public class ItemAdapter extends ArrayAdapter<Item> {
 
         if (item.getDirectory()) {
             viewHolder.name.setText(item.getName());
-            viewHolder.itemIcon.setImageResource(R.drawable.folder);
+            viewHolder.itemIcon.setImageResource(R.drawable.ic_folder);
             if (item.getName().equals("..")) {
                 viewHolder.detailsButton.setVisibility(View.GONE);
             }
