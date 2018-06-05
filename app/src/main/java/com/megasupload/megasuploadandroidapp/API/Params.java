@@ -1,6 +1,10 @@
 package com.megasupload.megasuploadandroidapp.API;
 
+import android.net.Uri;
+
 import org.json.JSONObject;
+
+import java.net.URI;
 
 public class Params {
 
@@ -8,6 +12,8 @@ public class Params {
     private String method;
     private JSONObject jsonObject;
     private String sessionCookie;
+    private Uri uri;
+    private String uploadDirectory;
 
     public String getUrl() {
         return url;
@@ -41,4 +47,11 @@ public class Params {
         this.sessionCookie = sessionCookie;
     }
 
+    public Uri getUri() { return uri; }
+
+    public void setUri(Uri uri) { this.uri = uri; }
+
+    public String getUploadDirectory() { return uploadDirectory; }
+
+    public void setUploadDirectory(String uploadDirectory) { this.uploadDirectory = uploadDirectory; }
 }

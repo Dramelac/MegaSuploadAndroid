@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -40,6 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -168,6 +170,7 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     @Override
                     public void onClick(DialogInterface dialog,int which){
                         String dirName = name.getText().toString();
+                        Uri newFile = Uri.parse(dirName);
 
                         JSONObject jsonObject = new JSONObject();
                         try {
@@ -180,8 +183,9 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
 
                         //Initialisation des paramètres nécéssaires pour la requete à l'API
                         params.setUrl("https://megasupload.lsd-music.fr/api/file/upload");
-                        params.setMethod("POST");
-                        params.setJsonObject(jsonObject);
+                        params.setMethod("POSTFILE");
+                        params.setUri(newFile);
+                        params.setUploadDirectory(currentFolderId);
 
 
                         progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);
@@ -315,6 +319,11 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
             // Pull that URI using resultData.getData().
             if (resultData != null) {
                 file_name_string =  resultData.getData().toString();
+                final Uri uri = resultData.getData();
+                final String uriStr = resultData.getData().toString();
+                File test = new File(file_name_string);
+                String testname = test.getName();
+
                 AlertDialog.Builder alert = new AlertDialog.Builder(HomePage.this);
                 alert.setTitle("New File");
                 LayoutInflater inflater = getLayoutInflater();
@@ -328,19 +337,11 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     @Override
                     public void onClick(DialogInterface dialog,int which){
 
-                        JSONObject jsonObject = new JSONObject();
-                        try {
-                            jsonObject.accumulate("dirId", currentFolderId);
-                            jsonObject.accumulate("key", "");
-                            jsonObject.accumulate("file", file_name_string);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
                         //Initialisation des paramètres nécéssaires pour la requete à l'API
                         params.setUrl("https://megasupload.lsd-music.fr/api/file/upload");
-                        params.setMethod("POST");
-                        params.setJsonObject(jsonObject);
+                        params.setMethod("POSTFILE");
+                        params.setUri(uri);
+                        params.setUploadDirectory(currentFolderId);
 
 
                         progressDialog = new ProgressDialog(HomePage.this, R.style.Theme_AppCompat_DayNight_Dialog);

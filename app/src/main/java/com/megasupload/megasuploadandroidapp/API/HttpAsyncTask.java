@@ -1,6 +1,7 @@
 package com.megasupload.megasuploadandroidapp.API;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
@@ -14,13 +15,19 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -37,11 +44,16 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object>> 
         Map<String, Object> result = new HashMap<String, Object>();
 
         if (params[0].getMethod().equals("POST")) {
+
             result = POST(params[0].getUrl(), params[0].getJsonObject(), params[0].getSessionCookie());
             return result;
         } else if (params[0].getMethod().equals("GET")) {
 
             return GET(params[0].getUrl(), params[0].getSessionCookie());
+
+        } else if (params[0].getMethod().equals("POSTFILE")) {
+
+            return POSTFILE(params[0].getUrl(), params[0].getUri(), params[0].getUploadDirectory());
         } else {
             result.put("message", "Error");
             return result;
@@ -170,6 +182,91 @@ public class HttpAsyncTask extends AsyncTask<Params, Void, Map<String, Object>> 
         // 11. return result
         return result;
     }
+
+    public static Map<String, Object> POSTFILE(String urltest, Uri uri, String uploadDirectory) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        String file_name = "";
+        try {
+            String lineEnd = "\r\n";
+            String twoHyphens = "--";
+            String boundary = "*****";
+            int bytesRead, bytesAvailable, bufferSize;
+            byte[] buffer;
+            int maxBufferSize = 1024 * 1024;
+            URL url = new URL(urltest);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            // Allow Inputs &amp; Outputs.
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setUseCaches(false);
+
+            // Set HTTP method to POST.
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Connection", "Keep-Alive");
+            connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+            FileInputStream fileInputStream;
+            DataOutputStream outputStream;
+            outputStream = new DataOutputStream(connection.getOutputStream());
+            outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"reference\"" + lineEnd);
+            outputStream.writeBytes(lineEnd);
+            outputStream.writeBytes("my_refrence_text");
+            outputStream.writeBytes(lineEnd);
+            outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"file\";filename=\"" + uri.getLastPathSegment() + "\"" + lineEnd);
+            outputStream.writeBytes(lineEnd);
+            outputStream.writeBytes(twoHyphens + boundary + lineEnd);
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"dirId\";value=\"" + uploadDirectory + "\"" + lineEnd);
+            outputStream.writeBytes(lineEnd);
+            File file = new File(uri.toString());
+            fileInputStream = new FileInputStream(file);
+            bytesAvailable = fileInputStream.available();
+            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            buffer = new byte[bufferSize];
+
+            // Read file
+            bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+            while (bytesRead > 0) {
+                outputStream.write(buffer, 0, bufferSize);
+                bytesAvailable = fileInputStream.available();
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+            }
+            outputStream.writeBytes(lineEnd);
+            outputStream.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+            // Responses from the server (code and message)
+            int serverResponseCode = connection.getResponseCode();
+            String requestResult = null;
+            if (serverResponseCode == 200) {
+                StringBuilder s_buffer = new StringBuilder();
+                InputStream is = new BufferedInputStream(connection.getInputStream());
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                String inputLine;
+                while ((inputLine = br.readLine()) != null) {
+                    s_buffer.append(inputLine);
+                }
+                requestResult = s_buffer.toString();
+            }
+            fileInputStream.close();
+            outputStream.flush();
+            outputStream.close();
+            if (requestResult != null) {
+                Log.d("result_for upload", requestResult);
+                //   file_name = getDataFromInputStream(requestResult, "file_name");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        result.put("message", "C'est bon");
+        return result;
+
+
+    }
+
 
     private static Map<String, Object> convertInputStreamToString(InputStream inputStream) throws IOException {
 
