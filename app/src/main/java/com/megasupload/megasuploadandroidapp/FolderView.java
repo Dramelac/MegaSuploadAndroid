@@ -138,6 +138,7 @@ public class FolderView extends AppCompatActivity implements AsyncResponse {
                 View alertLayout = inflater.inflate(R.layout.creation_dialog, null);
                 alert.setView(alertLayout);
                 final EditText newName = alertLayout.findViewById(R.id.newname);
+                newName.setText(name);
                 alert.setCancelable(false);
                 alert.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
 
