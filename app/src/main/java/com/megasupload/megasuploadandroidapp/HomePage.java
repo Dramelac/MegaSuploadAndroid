@@ -420,6 +420,7 @@ public class HomePage extends AppCompatActivity implements AsyncResponse, ItemAd
                     String directoryResult = output.get("directory").toString();
                     String fileResult = output.get("file").toString();
 
+
                     fileResult = fileResult.replaceAll("/", ""); //Pour eviter les erreurs lors de la transformation en Json array
 
                     JSONArray directory = new JSONArray(directoryResult);
